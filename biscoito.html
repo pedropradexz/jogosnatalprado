@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Destrua o Biscoito 🍪💥 - TV</title>
+  <title>Guerra de Biscoitos 🍪🏰 - TV</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
@@ -34,7 +34,7 @@
     .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 12px #ff2a2a; }
     .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 12px #ffd700; animation-delay: 0.2s; }
     .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 12px #2ecc71; animation-delay: 0.4s; }
-    .luz:nth-child(4n+4) { background: #d97706; box-shadow: 0 0 12px #d97706; animation-delay: 0.6s; }
+    .luz:nth-child(4n+4) { background: #3498db; box-shadow: 0 0 12px #3498db; animation-delay: 0.6s; }
 
     @keyframes piscar {
       0% { opacity: 0.4; transform: scale(0.9); }
@@ -42,7 +42,7 @@
     }
 
     header { z-index: 4; width: 96%; flex-shrink: 0; }
-    h1 { font-size: 1.5rem; color: #ffd700; text-shadow: 0 3px 8px rgba(0,0,0,0.85); }
+    h1 { font-size: 1.4rem; color: #ffd700; text-shadow: 0 3px 8px rgba(0,0,0,0.85); }
 
     .hud-superior {
       display: flex; justify-content: space-around; align-items: center;
@@ -62,54 +62,91 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.85);
       z-index: 10;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
+      padding: 0 40px;
     }
 
-    /* Boss Biscoito Gigante */
-    #biscoito-boss {
-      font-size: 9rem;
-      cursor: pointer;
-      transition: transform 0.1s ease;
-      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
-      animation: flutuarBiscoito 2s ease-in-out infinite alternate;
-      user-select: none;
+    .fortaleza {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 35%;
+      gap: 15px;
+      position: relative;
     }
-    #biscoito-boss.atingido {
-      transform: scale(0.9) rotate(-10deg);
+
+    .torre-icone {
+      font-size: 7rem;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+      transition: transform 0.1s ease;
+    }
+    .torre-icone.atingida {
+      transform: scale(0.85) rotate(5deg);
       filter: drop-shadow(0 0 30px #ff2a2a) brightness(1.3);
     }
 
-    @keyframes flutuarBiscoito {
-      0% { transform: translateY(0px) rotate(0deg); }
-      100% { transform: translateY(-15px) rotate(3deg); }
-    }
-
     .barra-vida-container {
-      width: 60%;
+      width: 100%;
       background: rgba(0,0,0,0.7);
       border: 3px solid #ffd700;
       border-radius: 20px;
-      height: 32px;
-      margin: 15px auto;
+      height: 28px;
       overflow: hidden;
       position: relative;
       box-shadow: 0 4px 15px rgba(0,0,0,0.6);
     }
 
-    #barra-vida-fill {
+    .barra-vida-fill {
       height: 100%;
       width: 100%;
-      background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c);
       transition: width 0.2s ease;
     }
+    #vida-vermelha { background: linear-gradient(90deg, #c41e3a, #ff2a2a); }
+    #vida-azul { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
 
     .texto-vida {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       display: flex; justify-content: center; align-items: center;
-      font-weight: 900; font-size: 1rem; color: #fff; text-shadow: 0 2px 4px #000;
+      font-weight: 900; font-size: 0.9rem; color: #fff; text-shadow: 0 2px 4px #000;
+    }
+
+    .escudo-badge {
+      background: rgba(52, 152, 219, 0.3);
+      border: 2px solid #3498db;
+      color: #3498db;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .lista-membros {
+      background: rgba(0,0,0,0.5);
+      border-radius: 12px;
+      padding: 8px 12px;
+      width: 100%;
+      font-size: 0.85rem;
+      max-height: 90px;
+      overflow-y: auto;
+      text-align: left;
+      border: 1px solid rgba(255,215,0,0.2);
+    }
+
+    #arena-combate {
+      position: absolute;
+      width: 100%; height: 100%;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    .projecil {
+      position: absolute;
+      font-size: 2rem;
+      transition: transform 0.5s linear;
     }
 
     #overlay-tela {
@@ -129,16 +166,6 @@
 
     #qrcode-box { background: #ffffff; padding: 10px; border-radius: 12px; }
 
-    #lista-slots-lobby {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; min-width: 320px;
-    }
-
-    .slot-lobby {
-      background: rgba(255,255,255,0.07); border: 2px dashed #64748b;
-      border-radius: 12px; padding: 10px 14px; text-align: left;
-    }
-    .slot-lobby.pronto { border-style: solid; background: rgba(46, 204, 113, 0.16); }
-
     .btn-acao {
       background: #2ecc71; color: #fff; border: none; padding: 14px 38px;
       font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer;
@@ -146,22 +173,6 @@
     }
     .btn-acao:hover { transform: scale(1.05); background: #27ae60; }
     .btn-acao:disabled { background: #475569; cursor: not-allowed; transform: none; }
-
-    /* Efeitos de partículas / dano flutuante */
-    .dano-flutuante {
-      position: absolute;
-      font-weight: 900;
-      font-size: 1.6rem;
-      color: #ffd700;
-      text-shadow: 0 2px 6px #000;
-      pointer-events: none;
-      animation: subirDano 0.8s ease-out forwards;
-      z-index: 25;
-    }
-    @keyframes subirDano {
-      0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-70px) scale(1.4); }
-    }
   </style>
 </head>
 <body>
@@ -169,28 +180,44 @@
   <div class="pisca-pisca" id="luzes-topo"></div>
 
   <header>
-    <h1>🍪 DESTRUA O BISCOITO • GUERRA DE GENGIBRE 💥</h1>
+    <h1>🏰 GUERRA DE BISCOITOS • FORTALEZAS DE GENGIBRE 🍪</h1>
     <div class="hud-superior">
-      <div>TEMPO: <span id="tempo-valor" style="color:#3498db;">45</span>s</div>
-      <div id="hud-placar">Aguardando guerreiros...</div>
+      <div>TEMPO: <span id="tempo-valor" style="color:#3498db;">60</span>s</div>
+      <div id="hud-placar">Aguardando guerreiros nas equipes...</div>
     </div>
   </header>
 
   <div id="container-arena">
-    <div class="barra-vida-container">
-      <div id="barra-vida-fill"></div>
-      <div class="texto-vida" id="texto-vida-val">HP: 1000 / 1000</div>
+    <div class="fortaleza" id="fortaleza-vermelha">
+      <div style="color: #ff2a2a; font-weight: 900; font-size: 1.1rem;">🔴 EQUIPA VERMELHA</div>
+      <div class="torre-icone" id="torre-vermelha">🏰</div>
+      <div class="barra-vida-container">
+        <div class="barra-vida-fill" id="vida-vermelha" style="width: 100%;"></div>
+        <div class="texto-vida" id="texto-vida-v">1000 / 1000</div>
+      </div>
+      <div class="escudo-badge" id="escudo-vermelho">🛡️ ESCUDO ATIVO!</div>
+      <div class="lista-membros" id="membros-vermelhos">Nenhum jogador</div>
     </div>
 
-    <div id="biscoito-boss">🍪</div>
-    <div id="efeitos-container" style="position: absolute; width:100%; height:100%; pointer-events: none;"></div>
+    <div class="fortaleza" id="fortaleza-azul">
+      <div style="color: #3b82f6; font-weight: 900; font-size: 1.1rem;">🔵 EQUIPA AZUL</div>
+      <div class="torre-icone" id="torre-azul">🏰</div>
+      <div class="barra-vida-container">
+        <div class="barra-vida-fill" id="vida-azul" style="width: 100%;"></div>
+        <div class="texto-vida" id="texto-vida-a">1000 / 1000</div>
+      </div>
+      <div class="escudo-badge" id="escudo-azul">🛡️ ESCUDO ATIVO!</div>
+      <div class="lista-membros" id="membros-azuis">Nenhum jogador</div>
+    </div>
+
+    <div id="arena-combate"></div>
   </div>
 
   <div class="pisca-pisca" id="luzes-base"></div>
 
   <div id="overlay-tela">
-    <h2 id="overlay-titulo">🍪 DESTRUA O BISCOITO</h2>
-    <p class="sub-selecao">Escaneie o QR code com o telemóvel e clique sem parar nos botões de ataque para destruir o Biscoito de Gengibre gigante antes que o tempo acabe!</p>
+    <h2 id="overlay-titulo">🍪 GUERRA DE BISCOITOS</h2>
+    <p class="sub-selecao">Escaneie o QR code com o telemóvel, escolha a sua Equipa e use os botões de "Lançar Glacê", "Atirar Biscoitos" ou "Escudo de Açúcar" para destruir a fortaleza inimiga!</p>
 
     <div id="painel-conexao">
       <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
@@ -198,11 +225,14 @@
         <div id="link-controle" style="font-size:0.75rem; color:#ffd700; max-width:220px; word-break:break-all;">Gerando sala...</div>
         <button onclick="copiarLink()" style="background:#3498db; color:#fff; border:none; padding:4px 10px; border-radius:8px; cursor:pointer; font-size:0.78rem; font-weight:bold;">📋 Copiar Link</button>
       </div>
-      <div id="lista-slots-lobby"></div>
+      <div style="text-align: left; font-size: 0.9rem; max-width: 350px;">
+        <p style="color:#ff2a2a; font-weight:bold;" id="status-vermelho">🔴 Equipa Vermelha: 0 jogadores</p>
+        <p style="color:#3b82f6; font-weight:bold; margin-top: 6px;" id="status-azul">🔵 Equipa Azul: 0 jogadores</p>
+      </div>
     </div>
 
     <div id="podio-resultado" style="display:none; margin-bottom:16px;"></div>
-    <button class="btn-acao" id="btn-iniciar" onclick="iniciarJogo()" disabled>⏳ AGUARDANDO JOGADORES...</button>
+    <button class="btn-acao" id="btn-iniciar" onclick="iniciarJogo()" disabled>⏳ AGUARDANDO JOGADORES EM AMBAS AS EQUIPAS...</button>
   </div>
 
   <script>
@@ -223,18 +253,25 @@
       const gain = audioCtx.createGain();
       osc.connect(gain); gain.connect(audioCtx.destination);
 
-      if (tipo === 'ataque') {
+      if (tipo === 'glace') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(320, agora);
-        osc.frequency.exponentialRampToValueAtTime(120, agora + 0.1);
-        gain.gain.setValueAtTime(0.25, agora);
+        osc.frequency.setValueAtTime(400, agora);
+        osc.frequency.exponentialRampToValueAtTime(200, agora + 0.1);
+        gain.gain.setValueAtTime(0.2, agora);
         gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.12);
         osc.start(agora); osc.stop(agora + 0.12);
-      } else if (tipo === 'especial') {
+      } else if (tipo === 'biscoito') {
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(500, agora);
-        osc.frequency.setValueAtTime(800, agora + 0.15);
-        gain.gain.setValueAtTime(0.3, agora);
+        osc.frequency.setValueAtTime(250, agora);
+        osc.frequency.exponentialRampToValueAtTime(100, agora + 0.15);
+        gain.gain.setValueAtTime(0.25, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.18);
+        osc.start(agora); osc.stop(agora + 0.18);
+      } else if (tipo === 'escudo') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, agora);
+        osc.frequency.setValueAtTime(900, agora + 0.2);
+        gain.gain.setValueAtTime(0.25, agora);
         gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.3);
         osc.start(agora); osc.stop(agora + 0.3);
       } else if (tipo === 'vitoria') {
@@ -252,18 +289,20 @@
       }
     }
 
-    const CORES_JOGADORES = ['#ff2a2a', '#2ecc71', '#3498db', '#ffd700'];
-    const ICONES_CHARS = ['🎅', '🤶', '🦌', '⛄'];
-
     let jogadoresConectados = [];
     let jogoAtivo = false;
-    let tempoRestante = 45;
+    let tempoRestante = 60;
     let timerJogo = null;
-    let hpMax = 1500;
-    let hpAtual = 1500;
+
+    let hpVermelho = 1000;
+    let hpAzul = 1000;
+    const hpMax = 1000;
+
+    let escudoVermelhoAtivo = false;
+    let escudoAzulAtivo = false;
 
     const overlayTela = document.getElementById('overlay-tela');
-    const salaId = 'BISCOITO-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+    const salaId = 'GUERRA-' + Math.random().toString(36).substring(2, 7).toUpperCase();
     const peer = new Peer(salaId);
     let urlControle = '';
 
@@ -286,37 +325,19 @@
     peer.on('connection', (conn) => {
       conn.on('data', (msg) => {
         if (msg.tipo === 'entrar') {
-          if (jogadoresConectados.length >= 4) {
-            conn.send({ tipo: 'sala_cheia' });
-            return;
-          }
-          const slot = jogadoresConectados.length;
           const novo = {
-            slot, peerId: conn.peer,
-            nome: msg.nome || `Guerreiro ${slot + 1}`,
-            icone: msg.icone || ICONES_CHARS[slot],
-            cor: CORES_JOGADORES[slot],
-            conn, danoTotal: 0
+            peerId: conn.peer,
+            nome: msg.nome || 'Guerreiro',
+            equipa: msg.equipa,
+            conn
           };
           jogadoresConectados.push(novo);
-          conn.send({ tipo: 'confirmado', slot, cor: novo.cor });
+          conn.send({ tipo: 'confirmado', equipa: novo.equipa });
           atualizarLobby();
-        } else if (msg.tipo === 'atacar' && jogoAtivo) {
-          const j = jogadoresConectados.find(x => x.slot === msg.slot);
+        } else if (msg.tipo === 'acao' && jogoAtivo) {
+          const j = jogadoresConectados.find(x => x.conn === conn);
           if (j) {
-            const dano = msg.especial ? 35 : 10;
-            j.danoTotal += dano;
-            hpAtual = Math.max(0, hpAtual - dano);
-            
-            tocarSom(msg.especial ? 'especial' : 'ataque');
-            animarBiscoito();
-            criarDanoFlutuante(msg.especial ? `💥 +${dano} ESPECIAL!` : `⭐ ${dano}`);
-            atualizarHUDVida();
-            atualizarHUDPlacar();
-
-            if (hpAtual <= 0) {
-              encerrarJogo(true);
-            }
+            executarAcao(j.equipa, msg.acao);
           }
         }
       });
@@ -328,62 +349,124 @@
     });
 
     function atualizarLobby() {
-      const listaEl = document.getElementById('lista-slots-lobby');
-      listaEl.innerHTML = '';
-      for (let i = 0; i < 4; i++) {
-        const j = jogadoresConectados[i];
-        const div = document.createElement('div');
-        div.className = 'slot-lobby' + (j ? ' pronto' : '');
-        div.style.borderColor = CORES_JOGADORES[i];
-        div.innerHTML = j ? `<div style="color:${CORES_JOGADORES[i]}; font-weight:bold;">P${i+1} • ${j.icone} ${j.nome}</div>` : `<div style="color:#64748b;">P${i+1} • Vago</div>`;
-        listaEl.appendChild(div);
-      }
+      const verm = jogadoresConectados.filter(j => j.equipa === 'vermelha');
+      const azul = jogadoresConectados.filter(j => j.equipa === 'azul');
+
+      document.getElementById('status-vermelho').innerText = `🔴 Equipa Vermelha: ${verm.length} jogador(es) (${verm.map(x=>x.nome).join(', ')})`;
+      document.getElementById('status-azul').innerText = `🔵 Equipa Azul: ${azul.length} jogador(es) (${azul.map(x=>x.nome).join(', ')})`;
+
+      document.getElementById('membros-vermelhos').innerHTML = verm.length ? verm.map(x=>`• ${x.nome}`).join('<br>') : 'Nenhum jogador';
+      document.getElementById('membros-azuis').innerHTML = azul.length ? azul.map(x=>`• ${x.nome}`).join('<br>') : 'Nenhum jogador';
+
       const btn = document.getElementById('btn-iniciar');
-      if (jogadoresConectados.length > 0) {
+      if (verm.length > 0 && azul.length > 0) {
         btn.disabled = false;
-        btn.innerText = `🍪 INICIAR GUERRA (${jogadoresConectados.length} JOGADORES)`;
+        btn.innerText = `⚔️ INICIAR GUERRA (${verm.length} vs ${azul.length})`;
       } else {
         btn.disabled = true;
-        btn.innerText = '⏳ AGUARDANDO JOGADORES...';
+        btn.innerText = '⏳ PRECISA DE JOGADORES EM AMBAS AS EQUIPAS';
       }
     }
 
-    function atualizarHUDPlacar() {
-      document.getElementById('hud-placar').innerHTML = jogadoresConectados.map(j => `<span style="color:${j.cor}; margin:0 8px;">${j.icone} ${j.nome}: <b>${j.danoTotal}</b></span>`).join(' | ') || 'Conecte-se para jogar!';
+    function executarAcao(equipa, acao) {
+      if (acao === 'glace') {
+        tocarSom('glace');
+        lancarProjecoes(equipa, '❄️', equipa === 'vermelha' ? 'azul' : 'vermelha', 25);
+      } else if (acao === 'biscoito') {
+        tocarSom('biscoito');
+        lancarProjecoes(equipa, '🍪', equipa === 'vermelha' ? 'azul' : 'vermelha', 50);
+      } else if (acao === 'escudo') {
+        tocarSom('escudo');
+        ativarEscudo(equipa);
+      }
     }
 
-    function atualizarHUDVida() {
-      const pct = Math.max(0, (hpAtual / hpMax) * 100);
-      document.getElementById('barra-vida-fill').style.width = pct + '%';
-      document.getElementById('texto-vida-val').innerText = `HP: ${hpAtual} / ${hpMax}`;
+    function lancarProjecoes(equipaOrigem, iconeEmoji, equipaAlvo, dano) {
+      const arena = document.getElementById('arena-combate');
+      const proj = document.createElement('div');
+      proj.className = 'projecil';
+      proj.innerText = iconeEmoji;
+
+      if (equipaOrigem === 'vermelha') {
+        proj.style.left = '20vw';
+        proj.style.top = '50vh';
+        arena.appendChild(proj);
+        setTimeout(() => { proj.style.transform = 'translateX(55vw)'; }, 50);
+      } else {
+        proj.style.left = '75vw';
+        proj.style.top = '50vh';
+        arena.appendChild(proj);
+        setTimeout(() => { proj.style.transform = 'translateX(-55vw)'; }, 50);
+      }
+
+      setTimeout(() => {
+        proj.remove();
+        aplicarDano(equipaAlvo, dano);
+      }, 500);
     }
 
-    function animarBiscoito() {
-      const b = document.getElementById('biscoito-boss');
-      b.classList.add('atingido');
-      setTimeout(() => b.classList.remove('atingido'), 120);
+    function aplicarDano(equipaAlvo, valor) {
+      if (equipaAlvo === 'azul') {
+        if (escudoAzulAtivo) return;
+        hpAzul = Math.max(0, hpAzul - valor);
+        animarTorre('azul');
+        atualizarHUD();
+        if (hpAzul <= 0) encerrarJogo('vermelha');
+      } else {
+        if (escudoVermelhoAtivo) return;
+        hpVermelho = Math.max(0, hpVermelho - valor);
+        animarTorre('vermelha');
+        atualizarHUD();
+        if (hpVermelho <= 0) encerrarJogo('azul');
+      }
     }
 
-    function criarDanoFlutuante(texto) {
-      const container = document.getElementById('efeitos-container');
-      const el = document.createElement('div');
-      el.className = 'dano-flutuante';
-      el.innerText = texto;
-      el.style.left = (45 + Math.random() * 10) + 'vw';
-      el.style.top = (35 + Math.random() * 15) + 'vh';
-      container.appendChild(el);
-      setTimeout(() => el.remove(), 800);
+    function ativarEscudo(equipa) {
+      if (equipa === 'vermelha') {
+        escudoVermelhoAtivo = true;
+        document.getElementById('escudo-vermelho').style.display = 'block';
+        setTimeout(() => {
+          escudoVermelhoAtivo = false;
+          document.getElementById('escudo-vermelho').style.display = 'none';
+        }, 4000);
+      } else {
+        escudoAzulAtivo = true;
+        document.getElementById('escudo-azul').style.display = 'block';
+        setTimeout(() => {
+          escudoAzulAtivo = false;
+          document.getElementById('escudo-azul').style.display = 'none';
+        }, 4000);
+      }
+    }
+
+    function animarTorre(eq) {
+      const t = document.getElementById(eq === 'vermelha' ? 'torre-vermelha' : 'torre-azul');
+      t.classList.add('atingida');
+      setTimeout(() => t.classList.remove('atingida'), 120);
+    }
+
+    function atualizarHUD() {
+      const pctV = (hpVermelho / hpMax) * 100;
+      const pctA = (hpAzul / hpMax) * 100;
+
+      document.getElementById('vida-vermelha').style.width = pctV + '%';
+      document.getElementById('texto-vida-v').innerText = `${hpVermelho} / ${hpMax}`;
+
+      document.getElementById('vida-azul').style.width = pctA + '%';
+      document.getElementById('texto-vida-a').innerText = `${hpAzul} / ${hpMax}`;
     }
 
     function iniciarJogo() {
       overlayTela.style.display = 'none';
-      tempoRestante = 45;
-      hpMax = jogadoresConectados.length * 400;
-      hpAtual = hpMax;
+      tempoRestante = 60;
+      hpVermelho = 1000;
+      hpAzul = 1000;
+      escudoVermelhoAtivo = false;
+      escudoAzulAtivo = false;
+      document.getElementById('escudo-vermelho').style.display = 'none';
+      document.getElementById('escudo-azul').style.display = 'none';
       document.getElementById('tempo-valor').innerText = tempoRestante;
-      jogadoresConectados.forEach(j => j.danoTotal = 0);
-      atualizarHUDVida();
-      atualizarHUDPlacar();
+      atualizarHUD();
       jogoAtivo = true;
 
       if (timerJogo) clearInterval(timerJogo);
@@ -392,32 +475,32 @@
         tempoRestante--;
         document.getElementById('tempo-valor').innerText = tempoRestante;
         if (tempoRestante <= 0) {
-          encerrarJogo(hpAtual <= 0);
+          if (hpVermelho > hpAzul) encerrarJogo('vermelha');
+          else if (hpAzul > hpVermelho) encerrarJogo('azul');
+          else encerrarJogo('empate');
         }
       }, 1000);
     }
 
-    function encerrarJogo(vitoria) {
+    function encerrarJogo(vencedor) {
       jogoAtivo = false;
       clearInterval(timerJogo);
       tocarSom('vitoria');
 
-      const ranking = [...jogadoresConectados].sort((a, b) => b.danoTotal - a.danoTotal);
       const podio = document.getElementById('podio-resultado');
       podio.style.display = 'block';
-      podio.innerHTML = `
-        <h3 style="color:#ffd700; font-size:1.8rem; margin-bottom:10px;">${vitoria ? '🏆 BISCOITO DESTRUÍDO COM SUCESSO! 🏆' : '⏰ TEMPO ESGOTADO! O BISCOITO FUGIU! 🍪'}</h3>
-        <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
-          ${ranking.map((r, i) => `
-            <div style="background:rgba(0,0,0,0.8); border:3px solid ${r.cor}; border-radius:16px; padding:12px 20px; min-width:140px;">
-              <div style="font-size:2rem;">${r.icone}</div>
-              <div style="font-weight:bold; color:${r.cor};">${r.nome}</div>
-              <div style="font-size:1.1rem; color:#2ecc71; font-weight:bold; margin-top:4px;">${r.danoTotal} dano</div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-      document.getElementById('overlay-titulo').innerText = vitoria ? '🎉 VITÓRIA DA EQUIPA!' : '💥 FIM DE JOGO!';
+
+      if (vencedor === 'vermelha') {
+        podio.innerHTML = `<h3 style="color:#ff2a2a; font-size:2rem;">🔴 A EQUIPA VERMELHA VENCEU A GUERRA! 🏆</h3>`;
+        document.getElementById('overlay-titulo').innerText = '🎉 VITÓRIA VERMELHA!';
+      } else if (vencedor === 'azul') {
+        podio.innerHTML = `<h3 style="color:#3b82f6; font-size:2rem;">🔵 A EQUIPA AZUL VENCEU A GUERRA! 🏆</h3>`;
+        document.getElementById('overlay-titulo').innerText = '🎉 VITÓRIA AZUL!';
+      } else {
+        podio.innerHTML = `<h3 style="color:#ffd700; font-size:2rem;">🤝 EMPATE! AS FORTALEZAS RESISTIRAM!</h3>`;
+        document.getElementById('overlay-titulo').innerText = '⏰ FIM DO TEMPO!';
+      }
+
       overlayTela.style.display = 'flex';
       document.getElementById('btn-iniciar').innerText = '🔄 JOGAR NOVAMENTE';
     }

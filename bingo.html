@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Bingo dos Elfos 🧝🎄</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: radial-gradient(circle at center, #143d59 0%, #061826 90%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      border: 14px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #ffd700, #ffd700 20px, #c41e3a 20px, #c41e3a 40px) 14;
+      transition: background 0.2s ease;
+    }
+
+    /* Efeito de Festa Piscando Colorido ao vencer */
+    body.festa-vencedor {
+      animation: piscarFundoFesta 0.35s infinite alternate !important;
+    }
+
+    @keyframes piscarFundoFesta {
+      0% { background: radial-gradient(circle, #c41e3a 0%, #4a0404 90%); }
+      33% { background: radial-gradient(circle, #2ecc71 0%, #093614 90%); }
+      66% { background: radial-gradient(circle, #d4af37 0%, #4d3b00 90%); }
+      100% { background: radial-gradient(circle, #2980b9 0%, #071e30 90%); }
+    }
+
+    .pisca-pisca {
+      width: 100%; display: flex; justify-content: space-around; padding: 6px 20px; z-index: 4; flex-shrink: 0;
+    }
+    .luz {
+      width: 15px; height: 22px; border-radius: 50%;
+      animation: piscar 0.7s infinite alternate;
+    }
+    .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 14px #ff2a2a; }
+    .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 14px #ffd700; animation-delay: 0.15s; }
+    .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 14px #2ecc71; animation-delay: 0.3s; }
+    .luz:nth-child(4n+4) { background: #3498db; box-shadow: 0 0 14px #3498db; animation-delay: 0.45s; }
+
+    @keyframes piscar {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.25); }
+    }
+
+    header { z-index: 4; width: 92%; flex-shrink: 0; }
+    h1 { font-size: 2.2rem; color: #ffd700; text-shadow: 0 4px 10px rgba(0,0,0,0.85); }
+    .subtitulo { font-size: 1rem; color: #e0f2fe; margin-top: 2px; }
+
+    /* Área Principal do Bingo */
+    #palco-bingo {
+      display: flex;
+      gap: 24px;
+      width: 92%;
+      max-width: 1150px;
+      flex: 1;
+      margin: 12px auto;
+      z-index: 10;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    /* Globo / Sorteador Esquerdo */
+    .painel-sorteador {
+      flex: 1.1;
+      background: rgba(0, 0, 0, 0.72);
+      border: 4px solid #ffd700;
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.85);
+    }
+
+    .globo-display {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle, rgba(255,215,0,0.16) 0%, rgba(0,0,0,0.5) 85%);
+      border: 3px dashed #ffd700;
+      border-radius: 20px;
+      margin: 10px 0;
+      padding: 15px;
+      transition: transform 0.2s;
+    }
+    .globo-display.animar-sorteio {
+      transform: scale(1.04);
+      border-color: #2ecc71;
+    }
+
+    #icone-sorteado {
+      font-size: 5.5rem;
+      line-height: 1.1;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+    }
+
+    #palavra-sorteada {
+      font-size: 2.3rem;
+      font-weight: 900;
+      color: #ffd700;
+      text-transform: uppercase;
+      margin-top: 8px;
+      text-shadow: 0 3px 10px rgba(0,0,0,0.9);
+    }
+
+    .botoes-controle {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .linha-botoes {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .btn {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 13px 18px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      border-radius: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(46, 204, 113, 0.5);
+      transition: transform 0.15s, background 0.2s;
+      flex: 1;
+    }
+    .btn:hover { transform: scale(1.03); background: #27ae60; }
+    .btn:disabled { background: #475569; box-shadow: none; cursor: not-allowed; transform: none; }
+
+    .btn-alarme-natal {
+      background: linear-gradient(135deg, #ff2a2a, #c41e3a);
+      border: 3px solid #ffd700;
+      font-size: 1.35rem;
+      padding: 15px;
+      box-shadow: 0 0 25px rgba(255, 42, 42, 0.75);
+      animation: pulsarBotaoAlarme 1s infinite alternate;
+    }
+    .btn-alarme-natal:hover { background: #e11d48; }
+
+    @keyframes pulsarBotaoAlarme {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.03); }
+    }
+
+    .btn-secundario {
+      background: #3498db;
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    }
+    .btn-secundario:hover { background: #2980b9; }
+
+    /* Painel Histórico Direito */
+    .painel-historico {
+      flex: 1.3;
+      background: rgba(0, 0, 0, 0.72);
+      border: 4px solid #ffd700;
+      border-radius: 24px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.85);
+    }
+
+    .topo-historico {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid rgba(255, 215, 0, 0.35);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      font-weight: bold;
+      color: #ffd700;
+      font-size: 1.1rem;
+    }
+
+    #grid-sorteadas {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+      gap: 8px;
+      overflow-y: auto;
+      padding-right: 4px;
+      align-content: start;
+      flex: 1;
+    }
+
+    .tag-palavra {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 215, 0, 0.5);
+      border-radius: 12px;
+      padding: 8px 6px;
+      font-size: 0.92rem;
+      font-weight: bold;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      animation: surgirTag 0.25s ease-out;
+    }
+    .tag-palavra.ultima {
+      background: rgba(46, 204, 113, 0.3);
+      border-color: #2ecc71;
+      color: #ffd700;
+    }
+
+    @keyframes surgirTag {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Overlay de Vitória "TEMOS UM VENCEDOR" */
+    #overlay-vitoria {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.72);
+      z-index: 40;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .caixa-vencedor {
+      background: rgba(6, 24, 38, 0.94);
+      border: 8px solid #ffd700;
+      border-radius: 32px;
+      padding: 36px 48px;
+      box-shadow: 0 0 60px #ffd700, 0 0 100px #ff2a2a;
+      animation: pularVencedor 0.6s infinite alternate;
+      max-width: 780px;
+    }
+
+    @keyframes pularVencedor {
+      from { transform: scale(0.97) rotate(-1deg); }
+      to { transform: scale(1.04) rotate(1deg); }
+    }
+
+    .decoracao-vitoria {
+      font-size: 3.4rem;
+      letter-spacing: 10px;
+      margin-bottom: 10px;
+    }
+
+    .titulo-vencedor {
+      font-size: 3.6rem;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 0 25px #ff2a2a, 0 4px 12px #000;
+      margin-bottom: 10px;
+    }
+
+    .sub-vencedor {
+      font-size: 1.5rem;
+      color: #2ecc71;
+      font-weight: bold;
+      margin-bottom: 24px;
+    }
+
+    /* Modal Cartela Rápida */
+    #modal-cartela {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(6, 24, 38, 0.95);
+      z-index: 35;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .grid-cartela-exemplo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background: rgba(0,0,0,0.8);
+      border: 4px solid #ffd700;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 16px 0;
+      max-width: 540px;
+      width: 100%;
+    }
+
+    .celula-cartela {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid #ffd700;
+      border-radius: 14px;
+      padding: 14px 8px;
+      font-weight: bold;
+      font-size: 1.05rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .celula-cartela.marcada {
+      background: #2ecc71;
+      color: #061826;
+      text-decoration: line-through;
+    }
+
+    .floco {
+      position: fixed; top: -50px; color: #ffffff; user-select: none; pointer-events: none; z-index: 2; opacity: 0.55; animation: nevar linear infinite;
+    }
+    @keyframes nevar {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(110vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="pisca-pisca" id="luzes-topo"></div>
+
+  <header>
+    <h1>🧝 BINGO DOS ELFOS 🎄</h1>
+    <p class="subtitulo">Anote 9 palavras natalinas na sua cartela. Completou tudo? Grite <b>"FELIZ NATAL!"</b> e aperte o alarme!</p>
+  </header>
+
+  <main id="palco-bingo">
+    <!-- Lado Esquerdo: Sorteador -->
+    <section class="painel-sorteador">
+      <div style="color:#ffd700; font-weight:900; font-size:1.15rem;">🔮 GLOBO MÁGICO DOS ELFOS</div>
+
+      <div class="globo-display" id="globo-box">
+        <div id="icone-sorteado">🎁</div>
+        <div id="palavra-sorteada">PRONTO PARA SORTEAR!</div>
+      </div>
+
+      <div class="botoes-controle">
+        <button class="btn" id="btn-sortear" onclick="sortearPalavra()">🎲 SORTEAR PALAVRA [ESPAÇO]</button>
+
+        <button class="btn btn-alarme-natal" onclick="acionarAlarmeVencedor()">
+          🚨 ALARME: FELIZ NATAL! 🔔
+        </button>
+
+        <div class="linha-botoes">
+          <button class="btn btn-secundario" onclick="abrirCartelaRapida()">📋 Cartela Rápida</button>
+          <button class="btn btn-secundario" style="background:#e67e22;" onclick="reiniciarBingo()">🔄 Nova Rodada</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lado Direito: Palavras já Sorteadas -->
+    <section class="painel-historico">
+      <div class="topo-historico">
+        <span>📜 PALAVRAS JÁ SORTEADAS</span>
+        <span id="contador-sorteadas">0 / 36</span>
+      </div>
+      <div id="grid-sorteadas"></div>
+    </section>
+  </main>
+
+  <div class="pisca-pisca" id="luzes-base"></div>
+
+  <!-- Overlay de Vitória Colorido -->
+  <div id="overlay-vitoria">
+    <div class="caixa-vencedor">
+      <div class="decoracao-vitoria">🎅 🎄 🔔 🎁 ⭐</div>
+      <div class="titulo-vencedor">🏆 TEMOS UM VENCEDOR! 🏆</div>
+      <div class="sub-vencedor">🎉 FELIZ NATAL! A CARTELA FOI COMPLETADA! 🎉</div>
+      <div class="decoracao-vitoria">🦌 ⛄ 🧦 🕯️ 🎊</div>
+      <button class="btn" style="font-size:1.3rem; padding:14px 38px;" onclick="fecharVitoria()">CONTINUAR / NOVA PARTIDA 🔄</button>
+    </div>
+  </div>
+
+  <!-- Modal de Cartela Interativa (caso alguém queira jogar na tela ou copiar palavras) -->
+  <div id="modal-cartela">
+    <h2 style="color:#ffd700; font-size:2rem;">📋 CARTELA DE NATAL ALEATÓRIA</h2>
+    <p style="color:#cbd5e1; margin-top:4px;">Copie estas 9 palavras para um papel ou clique nelas para marcar!</p>
+    <div class="grid-cartela-exemplo" id="grid-cartela-modal"></div>
+    <div style="display:flex; gap:14px;">
+      <button class="btn btn-secundario" onclick="gerarCartelaModal()">🎲 Gerar Outra Cartela</button>
+      <button class="btn" onclick="fecharCartelaRapida()">✅ Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    function criarLuzes(id) {
+      const el = document.getElementById(id);
+      for (let i = 0; i < 16; i++) {
+        const l = document.createElement('div'); l.className = 'luz'; el.appendChild(l);
+      }
+    }
+    criarLuzes('luzes-topo');
+    criarLuzes('luzes-base');
+
+    // Neve caindo no fundo
+    const simbolosNeve = ['❄', '❅', '❆', '✨'];
+    for (let i = 0; i < 26; i++) {
+      const floco = document.createElement('div');
+      floco.className = 'floco';
+      floco.innerText = simbolosNeve[Math.floor(Math.random() * simbolosNeve.length)];
+      floco.style.left = Math.random() * 100 + 'vw';
+      floco.style.fontSize = (Math.random() * 18 + 12) + 'px';
+      floco.style.animationDuration = (Math.random() * 5 + 5) + 's';
+      document.body.appendChild(floco);
+    }
+
+    // Banco de 36 Palavras Natalinas
+    const BANCO_NATAL = [
+      { palavra: 'Papai Noel', icone: '🎅' },
+      { palavra: 'Mamãe Noel', icone: '🤶' },
+      { palavra: 'Rena Rodolfo', icone: '🦌' },
+      { palavra: 'Trenó Mágico', icone: '🛷' },
+      { palavra: 'Árvore de Natal', icone: '🎄' },
+      { palavra: 'Presente', icone: '🎁' },
+      { palavra: 'Boneco de Neve', icone: '⛄' },
+      { palavra: 'Estrela Guia', icone: '⭐' },
+      { palavra: 'Sino de Natal', icone: '🔔' },
+      { palavra: 'Meia na Lareira', icone: '🧦' },
+      { palavra: 'Duende Ajudante', icone: '🧝' },
+      { palavra: 'O Grinch', icone: '💚' },
+      { palavra: 'Panetone', icone: '🍞' },
+      { palavra: 'Rabanada', icone: '🥖' },
+      { palavra: 'Peru Assado', icone: '🍗' },
+      { palavra: 'Biscoito Gengibre', icone: '🍪' },
+      { palavra: 'Bengala Doce', icone: '🍭' },
+      { palavra: 'Guirlanda', icone: '🌿' },
+      { palavra: 'Vela Natalina', icone: '🕯️' },
+      { palavra: 'Chaminé', icone: '🏠' },
+      { palavra: 'Pisca-Pisca', icone: '💡' },
+      { palavra: 'Floco de Neve', icone: '❄️' },
+      { palavra: 'Gorro Vermelho', icone: '🧢' },
+      { palavra: 'Anjo de Natal', icone: '👼' },
+      { palavra: 'Quebra-Nozes', icone: '💂' },
+      { palavra: 'Polo Norte', icone: '🧭' },
+      { palavra: 'Carta ao Noel', icone: '✉️' },
+      { palavra: 'Ceia em Família', icone: '🍽️' },
+      { palavra: 'Noite Feliz', icone: '🌙' },
+      { palavra: 'Bola de Natal', icone: '🔮' },
+      { palavra: 'Presépio', icone: '🌟' },
+      { palavra: 'Urso Polar', icone: '🐻‍❄️' },
+      { palavra: 'Pinguim', icone: '🐧' },
+      { palavra: 'Chocolate Quente', icone: '☕' },
+      { palavra: 'Laço Dourado', icone: '🎀' },
+      { palavra: 'Espírito Natalino', icone: '❤️' }
+    ];
+
+    let palavrasDisponiveis = [];
+    let palavrasSorteadas = [];
+    let sorteando = false;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function tocarSom(tipo) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const agora = audioCtx.currentTime;
+
+      if (tipo === 'roleta') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520 + Math.random() * 250, agora);
+        gain.gain.setValueAtTime(0.12, agora);
+        gain.gain.exponentialRampToValueAtTime(0.005, agora + 0.07);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(agora); osc.stop(agora + 0.07);
+      } else if (tipo === 'revelar') {
+        const notas = [523.25, 659.25, 783.99, 1046.50];
+        notas.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, agora + i * 0.08);
+          gain.gain.setValueAtTime(0.25, agora + i * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.01, agora + i * 0.08 + 0.25);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(agora + i * 0.08); osc.stop(agora + i * 0.08 + 0.25);
+        });
+      } else if (tipo === 'vencedor') {
+        // Fanfarra natalina épica!
+        const fanfarra = [
+          { f: 523.25, t: 0.00, d: 0.18 },
+          { f: 659.25, t: 0.16, d: 0.18 },
+          { f: 783.99, t: 0.32, d: 0.18 },
+          { f: 1046.50, t: 0.48, d: 0.40 },
+          { f: 783.99, t: 0.90, d: 0.18 },
+          { f: 1046.50, t: 1.10, d: 0.70 }
+        ];
+        fanfarra.forEach(n => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(n.f, agora + n.t);
+          gain.gain.setValueAtTime(0.38, agora + n.t);
+          gain.gain.exponentialRampToValueAtTime(0.01, agora + n.t + n.d);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(agora + n.t); osc.stop(agora + n.t + n.d);
+        });
+      }
+    }
+
+    function falarTexto(texto) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const fala = new SpeechSynthesisUtterance(texto);
+        fala.lang = 'pt-BR';
+        fala.rate = 1.05;
+        fala.pitch = 1.15;
+        window.speechSynthesis.speak(fala);
+      }
+    }
+
+    function reiniciarBingo() {
+      palavrasDisponiveis = [...BANCO_NATAL];
+      palavrasSorteadas = [];
+      sorteando = false;
+      document.body.classList.remove('festa-vencedor');
+      document.getElementById('overlay-vitoria').style.display = 'none';
+      document.getElementById('icone-sorteado').innerText = '🎁';
+      document.getElementById('palavra-sorteada').innerText = 'PRONTO PARA SORTEAR!';
+      document.getElementById('btn-sortear').disabled = false;
+      atualizarHistoricoUI();
+    }
+
+    function sortearPalavra() {
+      if (sorteando || palavrasDisponiveis.length === 0) return;
+      sorteando = true;
+      const btn = document.getElementById('btn-sortear');
+      const globo = document.getElementById('globo-box');
+      btn.disabled = true;
+      globo.classList.add('animar-sorteio');
+
+      let giros = 0;
+      const maxGiros = 14;
+      const intervalo = setInterval(() => {
+        const temp = BANCO_NATAL[Math.floor(Math.random() * BANCO_NATAL.length)];
+        document.getElementById('icone-sorteado').innerText = temp.icone;
+        document.getElementById('palavra-sorteada').innerText = temp.palavra;
+        tocarSom('roleta');
+        giros++;
+
+        if (giros >= maxGiros) {
+          clearInterval(intervalo);
+          const idxSorteado = Math.floor(Math.random() * palavrasDisponiveis.length);
+          const escolhida = palavrasDisponiveis.splice(idxSorteado, 1)[0];
+          palavrasSorteadas.unshift(escolhida);
+
+          document.getElementById('icone-sorteado').innerText = escolhida.icone;
+          document.getElementById('palavra-sorteada').innerText = escolhida.palavra;
+          globo.classList.remove('animar-sorteio');
+          tocarSom('revelar');
+          falarTexto(escolhida.palavra);
+
+          atualizarHistoricoUI();
+          sorteando = false;
+          if (palavrasDisponiveis.length > 0) {
+            btn.disabled = false;
+          } else {
+            btn.innerText = '✅ TODAS AS PALAVRAS SORTEADAS!';
+          }
+        }
+      }, 75);
+    }
+
+    function atualizarHistoricoUI() {
+      const grid = document.getElementById('grid-sorteadas');
+      document.getElementById('contador-sorteadas').innerText = `${palavrasSorteadas.length} / ${BANCO_NATAL.length}`;
+      grid.innerHTML = palavrasSorteadas.map((item, idx) => `
+        <div class="tag-palavra ${idx === 0 ? 'ultima' : ''}">
+          <span>${item.icone}</span>
+          <span>${item.palavra}</span>
+        </div>
+      `).join('');
+    }
+
+    function acionarAlarmeVencedor() {
+      document.body.classList.add('festa-vencedor');
+      document.getElementById('overlay-vitoria').style.display = 'flex';
+      tocarSom('vencedor');
+      falarTexto('Feliz Natal! Temos um vencedor!');
+    }
+
+    function fecharVitoria() {
+      document.body.classList.remove('festa-vencedor');
+      document.getElementById('overlay-vitoria').style.display = 'none';
+    }
+
+    // Cartela Rápida para quem não tem papel e caneta na hora
+    function abrirCartelaRapida() {
+      document.getElementById('modal-cartela').style.display = 'flex';
+      if (document.getElementById('grid-cartela-modal').innerHTML === '') {
+        gerarCartelaModal();
+      }
+    }
+
+    function fecharCartelaRapida() {
+      document.getElementById('modal-cartela').style.display = 'none';
+    }
+
+    function gerarCartelaModal() {
+      const embaralhadas = [...BANCO_NATAL].sort(() => Math.random() - 0.5).slice(0, 9);
+      const grid = document.getElementById('grid-cartela-modal');
+      grid.innerHTML = embaralhadas.map(item => `
+        <div class="celula-cartela" onclick="this.classList.toggle('marcada')">
+          <div style="font-size:1.8rem;">${item.icone}</div>
+          <div>${item.palavra}</div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (document.getElementById('overlay-vitoria').style.display !== 'flex') {
+          sortearPalavra();
+        }
+      }
+    });
+
+    reiniciarBingo();
+  </script>
+</body>
+</html>

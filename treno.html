@@ -675,11 +675,11 @@
         const alvo = oponentes[0];
         if (alvo) {
           if (poder.id === 'congelar') {
-            alvo.congeladoTimer = 180; // 3s congelado
+            alvo.congeladoTimer = 60; // 3s congelado
           } else if (poder.id === 'bomba') {
-            alvo.paradoBatidaTimer = 180; // 3s parado pela explosão!
+            alvo.paradoBatidaTimer = 85; // 3s parado pela explosão!
           } else if (poder.id === 'trava') {
-            alvo.travaDirecaoTimer = 240; // 4s sem conseguir trocar de pista!
+            alvo.travaDirecaoTimer = 180; // 4s sem conseguir trocar de pista!
           }
         }
       }
@@ -1027,7 +1027,7 @@
               if (c.alturaPulo < 22 && c.paradoBatidaTimer <= 0) {
                 tocarSom('batida');
                 objetosPista.splice(i, 1);
-                c.paradoBatidaTimer = 180; // 3 segundos parado!
+                c.paradoBatidaTimer = 55; // 3 segundos parado!
               }
             }
           }

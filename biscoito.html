@@ -189,7 +189,7 @@
 
   <div id="container-arena">
     <div class="fortaleza" id="fortaleza-vermelha">
-      <div style="color: #ff2a2a; font-weight: 900; font-size: 1.1rem;">🔴 EQUIPA VERMELHA</div>
+      <div style="color: #ff2a2a; font-weight: 900; font-size: 1.1rem;">🔴 EQUIPE VERMELHA</div>
       <div class="torre-icone" id="torre-vermelha">🏰</div>
       <div class="barra-vida-container">
         <div class="barra-vida-fill" id="vida-vermelha" style="width: 100%;"></div>
@@ -200,7 +200,7 @@
     </div>
 
     <div class="fortaleza" id="fortaleza-azul">
-      <div style="color: #3b82f6; font-weight: 900; font-size: 1.1rem;">🔵 EQUIPA AZUL</div>
+      <div style="color: #3b82f6; font-weight: 900; font-size: 1.1rem;">🔵 EQUIPE AZUL</div>
       <div class="torre-icone" id="torre-azul">🏰</div>
       <div class="barra-vida-container">
         <div class="barra-vida-fill" id="vida-azul" style="width: 100%;"></div>
@@ -217,7 +217,7 @@
 
   <div id="overlay-tela">
     <h2 id="overlay-titulo">🍪 GUERRA DE BISCOITOS</h2>
-    <p class="sub-selecao">Escaneie o QR code com o telemóvel, escolha a sua Equipa e use os botões de "Lançar Glacê", "Atirar Biscoitos" ou "Escudo de Açúcar" para destruir a fortaleza inimiga!</p>
+    <p class="sub-selecao">Escaneie o QR code com o telemóvel, escolha a sua Equipe e use os botões de "Lançar Glacê", "Atirar Biscoitos" ou "Escudo de Açúcar" para destruir a fortaleza inimiga!</p>
 
     <div id="painel-conexao">
       <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
@@ -226,13 +226,13 @@
         <button onclick="copiarLink()" style="background:#3498db; color:#fff; border:none; padding:4px 10px; border-radius:8px; cursor:pointer; font-size:0.78rem; font-weight:bold;">📋 Copiar Link</button>
       </div>
       <div style="text-align: left; font-size: 0.9rem; max-width: 350px;">
-        <p style="color:#ff2a2a; font-weight:bold;" id="status-vermelho">🔴 Equipa Vermelha: 0 jogadores</p>
-        <p style="color:#3b82f6; font-weight:bold; margin-top: 6px;" id="status-azul">🔵 Equipa Azul: 0 jogadores</p>
+        <p style="color:#ff2a2a; font-weight:bold;" id="status-vermelho">🔴 Equipe Vermelha: 0 jogadores</p>
+        <p style="color:#3b82f6; font-weight:bold; margin-top: 6px;" id="status-azul">🔵 Equipe Azul: 0 jogadores</p>
       </div>
     </div>
 
     <div id="podio-resultado" style="display:none; margin-bottom:16px;"></div>
-    <button class="btn-acao" id="btn-iniciar" onclick="iniciarJogo()" disabled>⏳ AGUARDANDO JOGADORES EM AMBAS AS EQUIPAS...</button>
+    <button class="btn-acao" id="btn-iniciar" onclick="iniciarJogo()" disabled>⏳ AGUARDANDO JOGADORES EM AMBAS AS EQUIPES...</button>
   </div>
 
   <script>
@@ -328,16 +328,16 @@
           const novo = {
             peerId: conn.peer,
             nome: msg.nome || 'Guerreiro',
-            equipa: msg.equipa,
+            equipe: msg.equipe,
             conn
           };
           jogadoresConectados.push(novo);
-          conn.send({ tipo: 'confirmado', equipa: novo.equipa });
+          conn.send({ tipo: 'confirmado', equipe: novo.equipe });
           atualizarLobby();
         } else if (msg.tipo === 'acao' && jogoAtivo) {
           const j = jogadoresConectados.find(x => x.conn === conn);
           if (j) {
-            executarAcao(j.equipa, msg.acao);
+            executarAcao(j.equipe, msg.acao);
           }
         }
       });

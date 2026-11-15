@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Controle • Destrua o Biscoito 📱</title>
+  <title>Controle • Guerra de Biscoitos 📱</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; user-select: none; }
@@ -20,7 +20,7 @@
       text-align: center;
     }
 
-    h1 { font-size: 1.2rem; color: #ffd700; margin-bottom: 2px; }
+    h1 { font-size: 1.1rem; color: #ffd700; margin-bottom: 2px; }
     .sub { font-size: 0.78rem; color: #cbd5e1; margin-bottom: 10px; }
 
     #tela-escolha { width: 100%; max-width: 400px; margin: auto; }
@@ -29,12 +29,13 @@
       background: rgba(0,0,0,0.6); color: #fff; font-size: 1.05rem; font-weight: bold; margin-bottom: 12px; text-align: center;
     }
 
-    .grid-icones { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
-    .card-icon {
-      background: rgba(255,255,255,0.08); border: 2px solid rgba(255,215,0,0.3);
-      border-radius: 12px; padding: 12px; font-size: 1.8rem; cursor: pointer;
+    .grid-equipes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .card-equipe {
+      background: rgba(255,255,255,0.08); border: 3px solid rgba(255,215,0,0.3);
+      border-radius: 14px; padding: 16px; font-size: 1rem; font-weight: bold; cursor: pointer;
     }
-    .card-icon.selecionado { border-color: #2ecc71; background: rgba(46, 204, 113, 0.3); }
+    .card-equipe.vermelha.selecionado { border-color: #ff2a2a; background: rgba(196, 30, 58, 0.4); }
+    .card-equipe.azul.selecionado { border-color: #3b82f6; background: rgba(59, 130, 246, 0.4); }
 
     .btn-principal {
       width: 100%; background: #2ecc71; color: #fff; border: none; padding: 14px;
@@ -42,74 +43,80 @@
     }
 
     #tela-controle {
-      display: none; width: 100%; height: 100%; flex-direction: column; justify-content: space-between; gap: 12px;
+      display: none; width: 100%; height: 100%; flex-direction: column; justify-content: space-between; gap: 10px;
     }
 
-    .btn-atacar {
+    .btn-acao-jogo {
       flex: 1;
-      background: linear-gradient(135deg, #d97706, #b45309);
-      color: #fff; border: 4px solid #ffd700; border-radius: 24px;
-      font-size: 1.5rem; font-weight: 900; cursor: pointer;
-      box-shadow: 0 6px 25px rgba(217, 119, 6, 0.6);
-      text-transform: uppercase;
-      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
+      border: 4px solid #ffd700; border-radius: 20px;
+      font-size: 1.2rem; font-weight: 900; cursor: pointer;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px;
+      color: #fff; text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
-    .btn-atacar:active { transform: scale(0.96); filter: brightness(1.2); }
+    .btn-acao-jogo:active { transform: scale(0.96); filter: brightness(1.2); }
 
-    .btn-especial {
-      background: linear-gradient(135deg, #ff2a2a, #c41e3a);
-      border-color: #fff;
-      box-shadow: 0 6px 25px rgba(255, 42, 42, 0.6);
-      font-size: 1.2rem;
-      flex: 0.6;
-    }
+    .btn-glace { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .btn-biscoito { background: linear-gradient(135deg, #d97706, #b45309); }
+    .btn-escudo { background: linear-gradient(135deg, #10b981, #059669); font-size: 1rem; flex: 0.7; }
   </style>
 </head>
 <body>
 
   <div id="tela-escolha">
-    <h1>🍪 DESTRUA O BISCOITO</h1>
+    <h1>🏰 GUERRA DE BISCOITOS</h1>
     <p class="sub" id="status-conexao">Conectando à TV...</p>
     <input type="text" id="input-nome" placeholder="Seu Apelido..." maxlength="12">
-    <div class="grid-icones" id="grid-icones"></div>
+    
+    <div class="grid-equipes">
+      <div class="card-equipe vermelha selecionado" onclick="escolherEquipa('vermelha')">
+        <div style="font-size: 2rem;">🔴</div>
+        Equipa Vermelha
+      </div>
+      <div class="card-equipe azul" onclick="escolherEquipa('azul')">
+        <div style="font-size: 2rem;">🔵</div>
+        Equipa Azul
+      </div>
+    </div>
+
     <button class="btn-principal" onclick="entrar()">ENTRAR NA BATALHA</button>
   </div>
 
   <div id="tela-controle">
     <div>
-      <h1 id="titulo-jogador">BATALHA DE GENGIBRE</h1>
-      <p class="sub">Toque sem parar para atacar o biscoito!</p>
+      <h1 id="titulo-equipa">BATALHA DE GENGIBRE</h1>
+      <p class="sub">Toque nos botões para atacar a base inimiga ou defender a sua!</p>
     </div>
 
-    <button class="btn-atacar" onclick="atacar(false)">
-      <div style="font-size: 3.5rem;">👊</div>
-      <div>SOCO DE AÇÚCAR!</div>
+    <button class="btn-acao-jogo btn-glace" onclick="enviarAcao('glace')">
+      <div style="font-size: 2.8rem;">❄️</div>
+      <div>LANÇAR GLACÊ (RÁPIDO)</div>
     </button>
 
-    <button class="btn-atacar btn-especial" onclick="atacar(true)">
-      <div style="font-size: 2.5rem;">💣</div>
-      <div>BOMBA DE GLACÊ!</div>
+    <button class="btn-acao-jogo btn-biscoito" onclick="enviarAcao('biscoito')">
+      <div style="font-size: 2.8rem;">🍪</div>
+      <div>ATIRAR BISCOITOS (PESADO)</div>
+    </button>
+
+    <button class="btn-acao-jogo btn-escudo" onclick="enviarAcao('escudo')">
+      <div style="font-size: 2rem;">🛡️</div>
+      <div>ATIVAR ESCUDO DE AÇÚCAR</div>
     </button>
   </div>
 
   <script>
-    const ICONES = ['🎅', '🤶', '🦌', '⛄'];
-    let iconeSel = '🎅';
-    let meuSlot = 0;
+    let equipaSel = 'vermelha';
     let connTV = null;
 
-    const grid = document.getElementById('grid-icones');
-    ICONES.forEach((ico, idx) => {
-      const d = document.createElement('div');
-      d.className = 'card-icon' + (idx === 0 ? ' selecionado' : '');
-      d.innerText = ico;
-      d.onclick = () => {
-        iconeSel = ico;
-        document.querySelectorAll('.card-icon').forEach(c => c.classList.remove('selecionado'));
-        d.classList.add('selecionado');
-      };
-      grid.appendChild(d);
-    });
+    function escolherEquipa(eq) {
+      equipaSel = eq;
+      document.querySelectorAll('.card-equipe').forEach(c => c.classList.remove('selecionado'));
+      if (eq === 'vermelha') {
+        document.querySelector('.card-equipe.vermelha').classList.add('selecionado');
+      } else {
+        document.querySelector('.card-equipe.azul').classList.add('selecionado');
+      }
+    }
 
     const params = new URLSearchParams(window.location.search);
     const salaId = params.get('sala');
@@ -122,14 +129,12 @@
       }
       connTV = peer.connect(salaId);
       connTV.on('open', () => {
-        document.getElementById('status-conexao').innerText = '🟢 Conectado! Escolha seu nome e ícone:';
+        document.getElementById('status-conexao').innerText = '🟢 Conectado! Escolha seu nome e equipa:';
       });
 
       connTV.on('data', (msg) => {
         if (msg.tipo === 'confirmado') {
-          meuSlot = msg.slot;
-        } else if (msg.tipo === 'sala_cheia') {
-          alert('Sala cheia na TV!');
+          // Confirmado
         }
       });
     });
@@ -138,14 +143,24 @@
       const nome = document.getElementById('input-nome').value.trim() || 'Guerreiro';
       document.getElementById('tela-escolha').style.display = 'none';
       document.getElementById('tela-controle').style.display = 'flex';
+      
+      const titulo = document.getElementById('titulo-equipa');
+      if (equipaSel === 'vermelha') {
+        titulo.innerText = '🔴 EQUIPA VERMELHA';
+        titulo.style.color = '#ff2a2a';
+      } else {
+        titulo.innerText = '🔵 EQUIPA AZUL';
+        titulo.style.color = '#3b82f6';
+      }
+
       if (connTV && connTV.open) {
-        connTV.send({ tipo: 'entrar', nome, icone: iconeSel });
+        connTV.send({ tipo: 'entrar', nome, equipa: equipaSel });
       }
     }
 
-    function atacar(especial) {
+    function enviarAcao(acao) {
       if (connTV && connTV.open) {
-        connTV.send({ tipo: 'atacar', slot: meuSlot, especial });
+        connTV.send({ tipo: 'acao', acao });
       }
     }
   </script>

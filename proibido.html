@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Não Conte para o Duende 🤫🎄 - Palavra Proibida</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: radial-gradient(circle at center, #143d59 0%, #061826 90%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      border: 14px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #ffd700, #ffd700 20px, #c41e3a 20px, #c41e3a 40px) 14;
+    }
+
+    .pisca-pisca {
+      width: 100%; display: flex; justify-content: space-around; padding: 6px 20px; z-index: 4; flex-shrink: 0;
+    }
+    .luz {
+      width: 15px; height: 22px; border-radius: 50%;
+      animation: piscar 0.7s infinite alternate;
+    }
+    .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 14px #ff2a2a; }
+    .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 14px #ffd700; animation-delay: 0.15s; }
+    .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 14px #2ecc71; animation-delay: 0.3s; }
+    .luz:nth-child(4n+4) { background: #3498db; box-shadow: 0 0 14px #3498db; animation-delay: 0.45s; }
+
+    @keyframes piscar {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.25); }
+    }
+
+    header { z-index: 4; width: 92%; flex-shrink: 0; margin-top: 5px; }
+    h1 { font-size: 2rem; color: #ffd700; text-shadow: 0 4px 10px rgba(0,0,0,0.85); }
+    .subtitulo { font-size: 0.95rem; color: #e0f2fe; margin-top: 2px; }
+
+    .card-principal {
+      background: rgba(0, 0, 0, 0.78);
+      border: 4px solid #ffd700;
+      border-radius: 24px;
+      padding: 24px;
+      max-width: 540px;
+      width: 90%;
+      box-shadow: 0 0 35px rgba(255, 215, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 10;
+      margin: auto;
+    }
+
+    h2 { font-size: 1.4rem; color: #2ecc71; }
+    p { font-size: 0.95rem; line-height: 1.4; color: #ddd; }
+
+    input[type="text"] {
+      padding: 12px;
+      font-size: 1.05rem;
+      border-radius: 12px;
+      border: 2px solid #ffd700;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      text-align: center;
+      outline: none;
+    }
+    input::placeholder { color: rgba(255,255,255,0.5); }
+
+    .btn {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(46, 204, 113, 0.6);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .btn:hover { transform: scale(1.04); background: #27ae60; }
+    .btn-perigo { background: #c41e3a; box-shadow: 0 0 18px rgba(196, 30, 58, 0.6); }
+    .btn-perigo:hover { background: #a01830; }
+    .btn-azul { background: #3498db; box-shadow: 0 0 18px rgba(52, 152, 219, 0.6); }
+    .btn-azul:hover { background: #2980b9; }
+
+    .lista-nomes {
+      max-height: 120px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.4);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.92rem;
+      text-align: left;
+      border: 1px solid rgba(255,215,0,0.3);
+    }
+    .lista-nomes div { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+    /* Carta do Jogo */
+    .carta-tabu {
+      background: #fff;
+      color: #061826;
+      border-radius: 20px;
+      padding: 20px;
+      border: 6px solid #c41e3a;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    .palavra-alvo {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #c41e3a;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      border-bottom: 3px dashed #cbd5e1;
+      padding-bottom: 10px;
+    }
+
+    .lista-proibidas {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .termo-proibido {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #ef4444;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-jogo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-weight: bold;
+      border: 1px solid rgba(255,215,0,0.3);
+    }
+
+    .floco {
+      position: absolute; top: -50px; color: #ffffff; user-select: none; pointer-events: none; z-index: 1; opacity: 0.5; animation: nevar linear infinite;
+    }
+    @keyframes nevar {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(110vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="pisca-pisca" id="luzes-topo"></div>
+
+  <header>
+    <h1>🤫 NÃO CONTE PARA O DUENDE 🎄</h1>
+    <p class="subtitulo">Descreva a palavra sem dizer os termos proibidos!</p>
+  </header>
+
+  <!-- TELA 1: CONFIGURAÇÃO DE JOGADORES -->
+  <div class="card-principal" id="tela-config">
+    <h2>👥 EQUIPES OU JOGADORES</h2>
+    <p>Adicione os participantes para rodar o jogo de cartas:</p>
+    <div style="display: flex; gap: 10px;">
+      <input type="text" id="input-nome" placeholder="Nome do Jogador / Equipa" style="flex: 1;" onkeypress="if(event.key==='Enter')adicionarJogador()">
+      <button class="btn" onclick="adicionarJogador()">Adicionar</button>
+    </div>
+    <div class="lista-nomes" id="lista-jogadores-div">Nenhum participante adicionado ainda.</div>
+    <button class="btn" id="btn-iniciar" onclick="iniciarPartida()" style="display: none;">COMEÇAR JOGO 🚀</button>
+  </div>
+
+  <!-- TELA 2: TURNO DO JOGADOR -->
+  <div class="card-principal" id="tela-turno" style="display: none;">
+    <h2>🎁 VEZ DE: <span id="span-jogador-vez" style="color: #3498db;"></span></h2>
+    <p>Passe o telemóvel/computador para este jogador em segredo e clique quando estiver pronto!</p>
+    <button class="btn btn-azul" onclick="mostrarCarta()">VER CARTA SECRETA 🤫</button>
+  </div>
+
+  <!-- TELA 3: A CARTA DE TABU ATIVA -->
+  <div class="card-principal" id="tela-jogo" style="display: none;">
+    <div class="hud-jogo">
+      <div>⏳ <span id="tempo-restante" style="color:#ff4d4d; font-size:1.2rem;">60</span>s</div>
+      <div>🏆 Pontos: <span id="pontos-turno" style="color:#2ecc71; font-size:1.2rem;">0</span></div>
+    </div>
+
+    <div class="carta-tabu">
+      <div style="font-size:0.8rem; font-weight:bold; color:#64748b; text-transform:uppercase;">Palavra Secreta</div>
+      <div class="palavra-alvo" id="card-palavra">PAPAI NOEL</div>
+      
+      <div style="font-size:0.8rem; font-weight:bold; color:#ef4444; text-transform:uppercase; margin-bottom:4px;">Proibido Dizer:</div>
+      <div class="lista-proibidas" id="card-proibidas">
+        <!-- Preenchido via JS -->
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-perigo" style="flex: 1;" onclick="proximaCarta(false)">❌ PASSAR (-1)</button>
+      <button class="btn" style="flex: 1;" onclick="proximaCarta(true)">✅ ACERTOU! (+1)</button>
+    </div>
+  </div>
+
+  <!-- TELA 4: FIM DO TURNO / PLACAR -->
+  <div class="card-principal" id="tela-fim-turno" style="display: none;">
+    <h2>⏰ FIM DO TEMPO!</h2>
+    <p id="resumo-turno" style="font-size: 1.2rem; color: #ffd700;">O jogador marcou X pontos.</p>
+    <div class="lista-nomes" id="placar-geral" style="max-height: 150px;"></div>
+    <button class="btn" onclick="proximoJogadorTurno()">PRÓXIMO JOGADOR ➡️</button>
+  </div>
+
+  <div class="pisca-pisca" id="luzes-base"></div>
+
+  <script>
+    function criarLuzes(id) {
+      const el = document.getElementById(id);
+      for (let i = 0; i < 14; i++) {
+        const l = document.createElement('div'); l.className = 'luz'; el.appendChild(l);
+      }
+    }
+    criarLuzes('luzes-topo');
+    criarLuzes('luzes-base');
+
+    const simbolosNeve = ['❄', '❅', '❆'];
+    for (let i = 0; i < 20; i++) {
+      const floco = document.createElement('div');
+      floco.className = 'floco';
+      floco.innerText = simbolosNeve[Math.floor(Math.random() * simbolosNeve.length)];
+      floco.style.left = Math.random() * 100 + 'vw';
+      floco.style.fontSize = (Math.random() * 16 + 10) + 'px';
+      floco.style.animationDuration = (Math.random() * 6 + 5) + 's';
+      document.body.appendChild(floco);
+    }
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function tocarSom(tipo) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const agora = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+
+      if (tipo === 'acerto') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, agora);
+        osc.frequency.setValueAtTime(880, agora + 0.1);
+        gain.gain.setValueAtTime(0.2, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.2);
+        osc.start(agora); osc.stop(agora + 0.2);
+      } else if (tipo === 'duende') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, agora);
+        osc.frequency.setValueAtTime(200, agora + 0.15);
+        gain.gain.setValueAtTime(0.25, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.3);
+        osc.start(agora); osc.stop(agora + 0.3);
+      }
+    }
+
+    // Baralho de Cartas Tabu Natalinas
+    const BARALHO = [
+      { palavra: "Papai Noel", proibidas: ["Noel", "Presente", "Barba", "Trenó", "Vermelho"] },
+      { palavra: "Árvore de Natal", proibidas: ["Pinheiro", "Estrela", "Enfeite", "Pisca-pisca", "Presente"] },
+      { palavra: "O Grinch", proibidas: ["Verde", "Malvado", "Natal", "Cachorro", "Roubar"] },
+      { palavra: "Panetone", proibidas: ["Doce", "Frutas", "Natal", "Massa", "Caixa"] },
+      { palavra: "Rena Rodolfo", proibidas: ["Nariz", "Vermelho", "Trenó", "Voo", "Animal"] },
+      { palavra: "Chaminé", proibidas: ["Casa", "Fumaça", "Telhado", "Papai Noel", "Tijolo"] },
+      { palavra: "Boneco de Neve", proibidas: ["Gelo", "Frio", "Cenoura", "Chapéu", "Branco"] },
+      { palavra: "Rabanada", proibidas: ["Pão", "Leite", "Óleo", "Açúcar", "Canela"] },
+      { palavra: "Guirlanda", proibidas: ["Porta", "Folhas", "Enfeite", "Redonda", "Natal"] },
+      { palavra: "Duende", proibidas: ["Elfo", "Fábrica", "Brinquedo", "Pequeno", "Papai Noel"] },
+      { palavra: "Peru de Natal", proibidas: ["Ave", "Ceia", "Assado", "Comida", "Prato"] },
+      { palavra: "Sino", proibidas: ["Tocar", "Igreja", "Som", "Metal", "Natal"] }
+    ];
+
+    let jogadores = [];
+    let pontuacoes = {};
+    let indiceJogadorAtual = 0;
+    let pontosRodada = 0;
+    let tempoRestante = 60;
+    let timerInterval = null;
+    let cartaAtual = null;
+    let baralhoEmbaralhado = [];
+
+    function adicionarJogador() {
+      const input = document.getElementById('input-nome');
+      const nome = input.value.trim();
+      if (nome && !jogadores.includes(nome)) {
+        jogadores.push(nome);
+        pontuacoes[nome] = 0;
+        input.value = '';
+        atualizarListaUI();
+      }
+    }
+
+    function atualizarListaUI() {
+      const listaDiv = document.getElementById('lista-jogadores-div');
+      const btnIniciar = document.getElementById('btn-iniciar');
+      if (jogadores.length === 0) {
+        listaDiv.innerHTML = "Nenhum participante adicionado ainda.";
+        btnIniciar.style.display = 'none';
+      } else {
+        listaDiv.innerHTML = jogadores.map((j, i) => `<div>${i+1}. 👤 ${j} (${pontuacoes[j]} pts)</div>`).join('');
+        if (jogadores.length >= 2) {
+          btnIniciar.style.display = 'block';
+        } else {
+          btnIniciar.style.display = 'none';
+          listaDiv.innerHTML += `<br><span style="color:#ffd700; font-size:0.8rem;">⚠️ Adicione pelo menos 2 jogadores/equipas.</span>`;
+        }
+      }
+    }
+
+    function iniciarPartida() {
+      indiceJogadorAtual = 0;
+      baralhoEmbaralhado = [...BARALHO].sort(() => Math.random() - 0.5);
+      prepararTurno();
+    }
+
+    function prepararTurno() {
+      document.getElementById('span-jogador-vez').innerText = jogadores[indiceJogadorAtual];
+      mostrarTela('tela-turno');
+    }
+
+    function mostrarCarta() {
+      pontosRodada = 0;
+      tempoRestante = 60;
+      document.getElementById('pontos-turno').innerText = '0';
+      document.getElementById('tempo-restante').innerText = '60';
+      
+      mostrarTela('tela-jogo');
+      sortearProximaCarta();
+
+      timerInterval = setInterval(() => {
+        tempoRestante--;
+        document.getElementById('tempo-restante').innerText = tempoRestante;
+        if (tempoRestante <= 0) {
+          encerrarTurno();
+        }
+      }, 1000);
+    }
+
+    function sortearProximaCarta() {
+      if (baralhoEmbaralhado.length === 0) {
+        baralhoEmbaralhado = [...BARALHO].sort(() => Math.random() - 0.5);
+      }
+      cartaAtual = baralhoEmbaralhado.pop();
+      document.getElementById('card-palavra').innerText = cartaAtual.palavra;
+      document.getElementById('card-proibidas').innerHTML = cartaAtual.proibidas.map(p => `
+        <div class="termo-proibido">❌ ${p}</div>
+      `).join('');
+    }
+
+    function proximaCarta(acertou) {
+      if (acertou) {
+        tocarSom('acerto');
+        pontosRodada++;
+      } else {
+        tocarSom('duende');
+        pontosRodada = Math.max(0, pontosRodada - 1);
+      }
+      document.getElementById('pontos-turno').innerText = pontosRodada;
+      sortearProximaCarta();
+    }
+
+    function encerrarTurno() {
+      clearInterval(timerInterval);
+      const jogador = jogadores[indiceJogadorAtual];
+      pontuacoes[jogador] += pontosRodada;
+
+      document.getElementById('resumo-turno').innerText = `${jogador} marcou ${pontosRodada} pontos nesta rodada!`;
+      document.getElementById('placar-geral').innerHTML = jogadores.map(j => `<div>👤 ${j}: <b>${pontuacoes[j]} pts</b></div>`).join('');
+      
+      mostrarTela('tela-fim-turno');
+    }
+
+    function proximoJogadorTurno() {
+      indiceJogadorAtual = (indiceJogadorAtual + 1) % jogadores.length;
+      prepararTurno();
+    }
+
+    function mostrarTela(id) {
+      ['tela-config', 'tela-turno', 'tela-jogo', 'tela-fim-turno'].forEach(t => {
+        document.getElementById(t).style.display = (t === id) ? 'flex' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

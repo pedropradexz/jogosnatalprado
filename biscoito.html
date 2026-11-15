@@ -2,165 +2,165 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎄 Sala de Jogos de Natal 🎅</title>
+  <title>Destrua o Biscoito 🍪💥 - TV</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      background: radial-gradient(circle at center, #143d59 0%, #061826 90%);
+      background: radial-gradient(circle at center, #2c1a0f 0%, #0d0603 95%);
       color: #ffffff;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-height: 100vh;
+      height: 100vh;
       width: 100vw;
-      overflow-x: hidden;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
       text-align: center;
       position: relative;
-      border: 14px solid transparent;
-      border-image: repeating-linear-gradient(45deg, #ffd700, #ffd700 20px, #c41e3a 20px, #c41e3a 40px) 14;
+      border: 10px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #d97706, #d97706 20px, #c41e3a 20px, #c41e3a 40px) 10;
     }
 
     .pisca-pisca {
-      width: 100%; display: flex; justify-content: space-around; padding: 8px 20px; z-index: 4;
+      width: 100%; display: flex; justify-content: space-around; padding: 4px 16px; z-index: 4; flex-shrink: 0;
     }
     .luz {
-      width: 16px; height: 24px; border-radius: 50%;
+      width: 12px; height: 18px; border-radius: 50%;
       animation: piscar 0.8s infinite alternate;
     }
-    .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 15px #ff2a2a; }
-    .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 15px #ffd700; animation-delay: 0.2s; }
-    .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 15px #2ecc71; animation-delay: 0.4s; }
-    .luz:nth-child(4n+4) { background: #3498db; box-shadow: 0 0 15px #3498db; animation-delay: 0.6s; }
+    .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 12px #ff2a2a; }
+    .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 12px #ffd700; animation-delay: 0.2s; }
+    .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 12px #2ecc71; animation-delay: 0.4s; }
+    .luz:nth-child(4n+4) { background: #d97706; box-shadow: 0 0 12px #d97706; animation-delay: 0.6s; }
 
     @keyframes piscar {
       0% { opacity: 0.4; transform: scale(0.9); }
       100% { opacity: 1; transform: scale(1.2); }
     }
 
-    header { z-index: 4; margin-top: 10px; padding: 0 20px; }
-    h1 {
-      font-size: 3rem;
-      color: #ffd700;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.85);
-      margin-bottom: 8px;
-    }
-    .subtitulo {
-      font-size: 1.2rem;
-      color: #e0f2fe;
-      opacity: 0.9;
+    header { z-index: 4; width: 96%; flex-shrink: 0; }
+    h1 { font-size: 1.5rem; color: #ffd700; text-shadow: 0 3px 8px rgba(0,0,0,0.85); }
+
+    .hud-superior {
+      display: flex; justify-content: space-around; align-items: center;
+      margin-top: 4px; background: rgba(0,0,0,0.65); padding: 6px 16px;
+      border-radius: 16px; border: 2px solid #ffd700; font-size: 0.95rem; font-weight: bold;
     }
 
-    .container-principal {
-      width: 94%;
-      max-width: 1400px;
-      margin: 20px auto;
-      z-index: 5;
-    }
-
-    .grid-jogos {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 26px;
-      width: 100%;
-    }
-
-    .card-jogo {
-      background: rgba(0, 0, 0, 0.65);
+    #container-arena {
+      position: relative;
+      width: 96vw;
+      height: calc(100vh - 125px);
+      margin: auto;
       border: 4px solid #ffd700;
-      border-radius: 24px;
-      padding: 24px 20px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: radial-gradient(circle, #3d2314 0%, #120904 90%);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.85);
+      z-index: 10;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      text-align: center;
-      text-decoration: none;
-      color: #ffffff;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.85);
-      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    }
+
+    /* Boss Biscoito Gigante */
+    #biscoito-boss {
+      font-size: 9rem;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+      animation: flutuarBiscoito 2s ease-in-out infinite alternate;
+      user-select: none;
+    }
+    #biscoito-boss.atingido {
+      transform: scale(0.9) rotate(-10deg);
+      filter: drop-shadow(0 0 30px #ff2a2a) brightness(1.3);
+    }
+
+    @keyframes flutuarBiscoito {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-15px) rotate(3deg); }
+    }
+
+    .barra-vida-container {
+      width: 60%;
+      background: rgba(0,0,0,0.7);
+      border: 3px solid #ffd700;
+      border-radius: 20px;
+      height: 32px;
+      margin: 15px auto;
+      overflow: hidden;
       position: relative;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
     }
 
-    .card-jogo:hover {
-      transform: translateY(-8px) scale(1.03);
-      box-shadow: 0 12px 40px rgba(255, 215, 0, 0.5);
-      border-color: #2ecc71;
+    #barra-vida-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c);
+      transition: width 0.2s ease;
     }
 
-    .card-luzes {
+    .texto-vida {
       position: absolute;
-      top: -6px;
-      left: 15px;
-      right: 15px;
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center;
+      font-weight: 900; font-size: 1rem; color: #fff; text-shadow: 0 2px 4px #000;
     }
 
-    .luz-card {
-      width: 10px;
-      height: 14px;
-      border-radius: 50%;
-      animation: piscar 0.7s infinite alternate;
-    }
-    .luz-card:nth-child(3n+1) { background: #ff2a2a; box-shadow: 0 0 10px #ff2a2a; }
-    .luz-card:nth-child(3n+2) { background: #ffd700; box-shadow: 0 0 10px #ffd700; animation-delay: 0.2s; }
-    .luz-card:nth-child(3n+3) { background: #2ecc71; box-shadow: 0 0 10px #2ecc71; animation-delay: 0.4s; }
-
-    .icone-jogo {
-      font-size: 3.8rem;
-      margin-bottom: 10px;
-      margin-top: 12px;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+    #overlay-tela {
+      display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(6, 24, 38, 0.98); z-index: 30; flex-direction: column;
+      justify-content: center; align-items: center; padding: 20px; text-align: center;
     }
 
-    .titulo-jogo {
-      font-size: 1.25rem;
-      font-weight: 800;
+    #overlay-tela h2 { font-size: 2.3rem; color: #ffd700; margin-bottom: 8px; text-shadow: 0 4px 12px rgba(0,0,0,0.8); }
+    .sub-selecao { font-size: 1rem; color: #e2e8f0; margin-bottom: 16px; max-width: 700px; }
+
+    #painel-conexao {
+      display: flex; gap: 24px; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.55); border: 3px solid #ffd700; border-radius: 20px;
+      padding: 16px 24px; margin-bottom: 16px; flex-wrap: wrap; max-width: 900px;
+    }
+
+    #qrcode-box { background: #ffffff; padding: 10px; border-radius: 12px; }
+
+    #lista-slots-lobby {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; min-width: 320px;
+    }
+
+    .slot-lobby {
+      background: rgba(255,255,255,0.07); border: 2px dashed #64748b;
+      border-radius: 12px; padding: 10px 14px; text-align: left;
+    }
+    .slot-lobby.pronto { border-style: solid; background: rgba(46, 204, 113, 0.16); }
+
+    .btn-acao {
+      background: #2ecc71; color: #fff; border: none; padding: 14px 38px;
+      font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer;
+      box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); transition: transform 0.2s;
+    }
+    .btn-acao:hover { transform: scale(1.05); background: #27ae60; }
+    .btn-acao:disabled { background: #475569; cursor: not-allowed; transform: none; }
+
+    /* Efeitos de partículas / dano flutuante */
+    .dano-flutuante {
+      position: absolute;
+      font-weight: 900;
+      font-size: 1.6rem;
       color: #ffd700;
-      margin-bottom: 10px;
-      text-transform: uppercase;
+      text-shadow: 0 2px 6px #000;
+      pointer-events: none;
+      animation: subirDano 0.8s ease-out forwards;
+      z-index: 25;
     }
-
-    .desc-jogo {
-      font-size: 0.92rem;
-      color: #e2e8f0;
-      line-height: 1.45;
-      margin-bottom: 18px;
-    }
-
-    .btn-jogar {
-      background: #2ecc71;
-      color: #fff;
-      font-weight: bold;
-      padding: 10px 24px;
-      border-radius: 25px;
-      font-size: 0.95rem;
-      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
-    }
-
-    .card-jogo:hover .btn-jogar {
-      background: #27ae60;
-    }
-
-    footer {
-      z-index: 4;
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.75);
-      margin: 24px 0 12px 0;
-      padding: 0 20px;
-    }
-
-    .floco {
-      position: fixed; top: -50px; color: #ffffff; user-select: none; pointer-events: none; z-index: 1; opacity: 0.45; animation: nevar linear infinite;
-    }
-    @keyframes nevar {
-      0% { transform: translateY(0) rotate(0deg); }
-      100% { transform: translateY(110vh) rotate(360deg); }
+    @keyframes subirDano {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-70px) scale(1.4); }
     }
   </style>
 </head>
@@ -169,93 +169,41 @@
   <div class="pisca-pisca" id="luzes-topo"></div>
 
   <header>
-    <h1>🎄 SALA DE JOGOS DE NATAL 🎅</h1>
-    <p class="subtitulo">Escolha um desafio abaixo e divirta-se com toda a família!</p>
+    <h1>🍪 DESTRUA O BISCOITO • GUERRA DE GENGIBRE 💥</h1>
+    <div class="hud-superior">
+      <div>TEMPO: <span id="tempo-valor" style="color:#3498db;">45</span>s</div>
+      <div id="hud-placar">Aguardando guerreiros...</div>
+    </div>
   </header>
 
-  <div class="container-principal">
-    <main class="grid-jogos">
-      
-      <a href="grinch.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">💚</div>
-        <div class="titulo-jogo">O Grinch Vai Te Ver?</div>
-        <p class="desc-jogo">Corra e dance enquanto o Grinch está de costas, mas congele como estátua assim que ele olhar!</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
+  <div id="container-arena">
+    <div class="barra-vida-container">
+      <div id="barra-vida-fill"></div>
+      <div class="texto-vida" id="texto-vida-val">HP: 1000 / 1000</div>
+    </div>
 
-      <a href="danca.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">🦌</div>
-        <div class="titulo-jogo">A Dança da Rena</div>
-        <p class="desc-jogo">Use a câmera para imitar poses radicais de Natal antes que o tempo da música acabe.</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
-
-      <a href="equilibrio.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">⚖️</div>
-        <div class="titulo-jogo">Você Consegue Equilibrar?</div>
-        <p class="desc-jogo">Pegue os presentes que caem do céu com uma mão e equilibre a torre na outra sem deixar desabar!</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
-
-      <a href="impostor.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">🕵️</div>
-        <div class="titulo-jogo">Quem é o Grinch?</div>
-        <p class="desc-jogo">Descubra quem está sabotando a festa com dicas secretas, alarme suspeito e placar em grupo.</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
-
-      <a href="bingo.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">🧝</div>
-        <div class="titulo-jogo">Bingo dos Elfos</div>
-        <p class="desc-jogo">Sorteie palavras natalinas, marque sua cartela e aperte o alarme <b>"FELIZ NATAL!"</b> para celebrar a vitória!</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
-
-      <a href="duende.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">🤫</div>
-        <div class="titulo-jogo">Não Conte para o Duende</div>
-        <p class="desc-jogo">Descreva a palavra natalina para a sua equipa sem dizer os termos proibidos antes que o tempo acabe!</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
-
-      <a href="treno.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">🛷</div>
-        <div class="titulo-jogo">Corrida de Trenó Maluca</div>
-        <p class="desc-jogo">Escolha entre 12 personagens e corra com até 4 amigos usando movimentos da cabeça, pulos e poderes!</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
-
-      <a href="neve_tv.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">⛄</div>
-        <div class="titulo-jogo">Batalha de Bolas de Neve</div>
-        <p class="desc-jogo">Use o celular como joystick e mira para batalhar em equipes (Duplas), Cada Um por Si ou contra o Robô Noel!</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
-
-      <a href="biscoito.html" class="card-jogo">
-        <div class="card-luzes"><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div><div class="luz-card"></div></div>
-        <div class="icone-jogo">🍪</div>
-        <div class="titulo-jogo">Destrua o Biscoito</div>
-        <p class="desc-jogo">Ataque o Biscoito de Gengibre gigante com socos de açúcar e bombas de glacê pelo celular antes que o tempo acabe!</p>
-        <span class="btn-jogar">JOGAR AGORA</span>
-      </a>
-
-    </main>
+    <div id="biscoito-boss">🍪</div>
+    <div id="efeitos-container" style="position: absolute; width:100%; height:100%; pointer-events: none;"></div>
   </div>
 
-  <footer>
-    Dica: Mantenha todos os arquivos HTML na mesma pasta no GitHub Pages para navegar entre os jogos!
-  </footer>
-
   <div class="pisca-pisca" id="luzes-base"></div>
+
+  <div id="overlay-tela">
+    <h2 id="overlay-titulo">🍪 DESTRUA O BISCOITO</h2>
+    <p class="sub-selecao">Escaneie o QR code com o telemóvel e clique sem parar nos botões de ataque para destruir o Biscoito de Gengibre gigante antes que o tempo acabe!</p>
+
+    <div id="painel-conexao">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+        <div id="qrcode-box"></div>
+        <div id="link-controle" style="font-size:0.75rem; color:#ffd700; max-width:220px; word-break:break-all;">Gerando sala...</div>
+        <button onclick="copiarLink()" style="background:#3498db; color:#fff; border:none; padding:4px 10px; border-radius:8px; cursor:pointer; font-size:0.78rem; font-weight:bold;">📋 Copiar Link</button>
+      </div>
+      <div id="lista-slots-lobby"></div>
+    </div>
+
+    <div id="podio-resultado" style="display:none; margin-bottom:16px;"></div>
+    <button class="btn-acao" id="btn-iniciar" onclick="iniciarJogo()" disabled>⏳ AGUARDANDO JOGADORES...</button>
+  </div>
 
   <script>
     function criarLuzes(id) {
@@ -267,15 +215,211 @@
     criarLuzes('luzes-topo');
     criarLuzes('luzes-base');
 
-    const simbolosNeve = ['❄', '❅', '❆'];
-    for (let i = 0; i < 24; i++) {
-      const floco = document.createElement('div');
-      floco.className = 'floco';
-      floco.innerText = simbolosNeve[Math.floor(Math.random() * simbolosNeve.length)];
-      floco.style.left = Math.random() * 100 + 'vw';
-      floco.style.fontSize = (Math.random() * 16 + 10) + 'px';
-      floco.style.animationDuration = (Math.random() * 6 + 6) + 's';
-      document.body.appendChild(floco);
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function tocarSom(tipo) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const agora = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+
+      if (tipo === 'ataque') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, agora);
+        osc.frequency.exponentialRampToValueAtTime(120, agora + 0.1);
+        gain.gain.setValueAtTime(0.25, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.12);
+        osc.start(agora); osc.stop(agora + 0.12);
+      } else if (tipo === 'especial') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(500, agora);
+        osc.frequency.setValueAtTime(800, agora + 0.15);
+        gain.gain.setValueAtTime(0.3, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.3);
+        osc.start(agora); osc.stop(agora + 0.3);
+      } else if (tipo === 'vitoria') {
+        const notas = [523.25, 659.25, 783.99, 1046.50];
+        notas.forEach((freq, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, agora + i * 0.15);
+          g.gain.setValueAtTime(0.3, agora + i * 0.15);
+          g.gain.exponentialRampToValueAtTime(0.01, agora + i * 0.15 + 0.35);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(agora + i * 0.15); o.stop(agora + i * 0.15 + 0.35);
+        });
+      }
+    }
+
+    const CORES_JOGADORES = ['#ff2a2a', '#2ecc71', '#3498db', '#ffd700'];
+    const ICONES_CHARS = ['🎅', '🤶', '🦌', '⛄'];
+
+    let jogadoresConectados = [];
+    let jogoAtivo = false;
+    let tempoRestante = 45;
+    let timerJogo = null;
+    let hpMax = 1500;
+    let hpAtual = 1500;
+
+    const overlayTela = document.getElementById('overlay-tela');
+    const salaId = 'BISCOITO-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+    const peer = new Peer(salaId);
+    let urlControle = '';
+
+    peer.on('open', (id) => {
+      const baseHref = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+      urlControle = `${baseHref}biscoito_controle.html?sala=${id}`;
+      document.getElementById('link-controle').innerText = urlControle;
+
+      const qrEl = document.getElementById('qrcode-box');
+      qrEl.innerHTML = '';
+      new QRCode(qrEl, { text: urlControle, width: 140, height: 140, colorDark: '#061826', colorLight: '#ffffff' });
+    });
+
+    function copiarLink() {
+      if (!urlControle) return;
+      navigator.clipboard.writeText(urlControle);
+      alert('✅ Link copiado!');
+    }
+
+    peer.on('connection', (conn) => {
+      conn.on('data', (msg) => {
+        if (msg.tipo === 'entrar') {
+          if (jogadoresConectados.length >= 4) {
+            conn.send({ tipo: 'sala_cheia' });
+            return;
+          }
+          const slot = jogadoresConectados.length;
+          const novo = {
+            slot, peerId: conn.peer,
+            nome: msg.nome || `Guerreiro ${slot + 1}`,
+            icone: msg.icone || ICONES_CHARS[slot],
+            cor: CORES_JOGADORES[slot],
+            conn, danoTotal: 0
+          };
+          jogadoresConectados.push(novo);
+          conn.send({ tipo: 'confirmado', slot, cor: novo.cor });
+          atualizarLobby();
+        } else if (msg.tipo === 'atacar' && jogoAtivo) {
+          const j = jogadoresConectados.find(x => x.slot === msg.slot);
+          if (j) {
+            const dano = msg.especial ? 35 : 10;
+            j.danoTotal += dano;
+            hpAtual = Math.max(0, hpAtual - dano);
+            
+            tocarSom(msg.especial ? 'especial' : 'ataque');
+            animarBiscoito();
+            criarDanoFlutuante(msg.especial ? `💥 +${dano} ESPECIAL!` : `⭐ ${dano}`);
+            atualizarHUDVida();
+            atualizarHUDPlacar();
+
+            if (hpAtual <= 0) {
+              encerrarJogo(true);
+            }
+          }
+        }
+      });
+
+      conn.on('close', () => {
+        jogadoresConectados = jogadoresConectados.filter(j => j.conn !== conn);
+        atualizarLobby();
+      });
+    });
+
+    function atualizarLobby() {
+      const listaEl = document.getElementById('lista-slots-lobby');
+      listaEl.innerHTML = '';
+      for (let i = 0; i < 4; i++) {
+        const j = jogadoresConectados[i];
+        const div = document.createElement('div');
+        div.className = 'slot-lobby' + (j ? ' pronto' : '');
+        div.style.borderColor = CORES_JOGADORES[i];
+        div.innerHTML = j ? `<div style="color:${CORES_JOGADORES[i]}; font-weight:bold;">P${i+1} • ${j.icone} ${j.nome}</div>` : `<div style="color:#64748b;">P${i+1} • Vago</div>`;
+        listaEl.appendChild(div);
+      }
+      const btn = document.getElementById('btn-iniciar');
+      if (jogadoresConectados.length > 0) {
+        btn.disabled = false;
+        btn.innerText = `🍪 INICIAR GUERRA (${jogadoresConectados.length} JOGADORES)`;
+      } else {
+        btn.disabled = true;
+        btn.innerText = '⏳ AGUARDANDO JOGADORES...';
+      }
+    }
+
+    function atualizarHUDPlacar() {
+      document.getElementById('hud-placar').innerHTML = jogadoresConectados.map(j => `<span style="color:${j.cor}; margin:0 8px;">${j.icone} ${j.nome}: <b>${j.danoTotal}</b></span>`).join(' | ') || 'Conecte-se para jogar!';
+    }
+
+    function atualizarHUDVida() {
+      const pct = Math.max(0, (hpAtual / hpMax) * 100);
+      document.getElementById('barra-vida-fill').style.width = pct + '%';
+      document.getElementById('texto-vida-val').innerText = `HP: ${hpAtual} / ${hpMax}`;
+    }
+
+    function animarBiscoito() {
+      const b = document.getElementById('biscoito-boss');
+      b.classList.add('atingido');
+      setTimeout(() => b.classList.remove('atingido'), 120);
+    }
+
+    function criarDanoFlutuante(texto) {
+      const container = document.getElementById('efeitos-container');
+      const el = document.createElement('div');
+      el.className = 'dano-flutuante';
+      el.innerText = texto;
+      el.style.left = (45 + Math.random() * 10) + 'vw';
+      el.style.top = (35 + Math.random() * 15) + 'vh';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 800);
+    }
+
+    function iniciarJogo() {
+      overlayTela.style.display = 'none';
+      tempoRestante = 45;
+      hpMax = jogadoresConectados.length * 400;
+      hpAtual = hpMax;
+      document.getElementById('tempo-valor').innerText = tempoRestante;
+      jogadoresConectados.forEach(j => j.danoTotal = 0);
+      atualizarHUDVida();
+      atualizarHUDPlacar();
+      jogoAtivo = true;
+
+      if (timerJogo) clearInterval(timerJogo);
+      timerJogo = setInterval(() => {
+        if (!jogoAtivo) return;
+        tempoRestante--;
+        document.getElementById('tempo-valor').innerText = tempoRestante;
+        if (tempoRestante <= 0) {
+          encerrarJogo(hpAtual <= 0);
+        }
+      }, 1000);
+    }
+
+    function encerrarJogo(vitoria) {
+      jogoAtivo = false;
+      clearInterval(timerJogo);
+      tocarSom('vitoria');
+
+      const ranking = [...jogadoresConectados].sort((a, b) => b.danoTotal - a.danoTotal);
+      const podio = document.getElementById('podio-resultado');
+      podio.style.display = 'block';
+      podio.innerHTML = `
+        <h3 style="color:#ffd700; font-size:1.8rem; margin-bottom:10px;">${vitoria ? '🏆 BISCOITO DESTRUÍDO COM SUCESSO! 🏆' : '⏰ TEMPO ESGOTADO! O BISCOITO FUGIU! 🍪'}</h3>
+        <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+          ${ranking.map((r, i) => `
+            <div style="background:rgba(0,0,0,0.8); border:3px solid ${r.cor}; border-radius:16px; padding:12px 20px; min-width:140px;">
+              <div style="font-size:2rem;">${r.icone}</div>
+              <div style="font-weight:bold; color:${r.cor};">${r.nome}</div>
+              <div style="font-size:1.1rem; color:#2ecc71; font-weight:bold; margin-top:4px;">${r.danoTotal} dano</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('overlay-titulo').innerText = vitoria ? '🎉 VITÓRIA DA EQUIPA!' : '💥 FIM DE JOGO!';
+      overlayTela.style.display = 'flex';
+      document.getElementById('btn-iniciar').innerText = '🔄 JOGAR NOVAMENTE';
     }
   </script>
 </body>

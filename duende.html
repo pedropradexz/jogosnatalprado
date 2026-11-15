@@ -48,19 +48,42 @@
       background: rgba(0, 0, 0, 0.78);
       border: 4px solid #ffd700;
       border-radius: 24px;
-      padding: 24px;
-      max-width: 540px;
-      width: 90%;
+      padding: 20px 24px;
+      max-width: 580px;
+      width: 92%;
       box-shadow: 0 0 35px rgba(255, 215, 0, 0.4);
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       z-index: 10;
       margin: auto;
     }
 
-    h2 { font-size: 1.4rem; color: #2ecc71; }
-    p { font-size: 0.95rem; line-height: 1.4; color: #ddd; }
+    h2 { font-size: 1.35rem; color: #2ecc71; }
+    p { font-size: 0.92rem; line-height: 1.4; color: #ddd; }
+
+    .config-linha {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.05);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,215,0,0.2);
+    }
+    .config-linha label { font-weight: bold; color: #ffd700; font-size: 0.95rem; text-align: left; }
+    .config-linha input {
+      width: 80px;
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 2px solid #ffd700;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      text-align: center;
+      outline: none;
+    }
 
     input[type="text"] {
       padding: 12px;
@@ -91,9 +114,11 @@
     .btn-perigo:hover { background: #a01830; }
     .btn-azul { background: #3498db; box-shadow: 0 0 18px rgba(52, 152, 219, 0.6); }
     .btn-azul:hover { background: #2980b9; }
+    .btn-amarelo { background: #d97706; box-shadow: 0 0 18px rgba(217, 119, 6, 0.6); }
+    .btn-amarelo:hover { background: #b45309; }
 
     .lista-nomes {
-      max-height: 120px;
+      max-height: 110px;
       overflow-y: auto;
       background: rgba(0,0,0,0.4);
       border-radius: 12px;
@@ -109,35 +134,35 @@
       background: #fff;
       color: #061826;
       border-radius: 20px;
-      padding: 20px;
+      padding: 18px;
       border: 6px solid #c41e3a;
       box-shadow: 0 8px 25px rgba(0,0,0,0.6);
       position: relative;
     }
 
     .palavra-alvo {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 900;
       color: #c41e3a;
       text-transform: uppercase;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       border-bottom: 3px dashed #cbd5e1;
-      padding-bottom: 10px;
+      padding-bottom: 8px;
     }
 
     .lista-proibidas {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       text-align: left;
       background: #f8fafc;
-      padding: 12px;
+      padding: 10px 12px;
       border-radius: 12px;
       border: 2px solid #e2e8f0;
     }
 
     .termo-proibido {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 800;
       color: #ef4444;
       display: flex;
@@ -154,6 +179,38 @@
       border-radius: 14px;
       font-weight: bold;
       border: 1px solid rgba(255,215,0,0.3);
+    }
+
+    #caixa-dica {
+      background: rgba(217, 119, 6, 0.2);
+      border: 2px dashed #f59e0b;
+      border-radius: 12px;
+      padding: 10px;
+      color: #fef3c7;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    /* Card Final do Vencedor */
+    .caixa-vencedor {
+      background: rgba(6, 24, 38, 0.95);
+      border: 6px solid #ffd700;
+      border-radius: 28px;
+      padding: 30px;
+      box-shadow: 0 0 50px #ffd700, 0 0 80px #c41e3a;
+      max-width: 600px;
+      width: 92%;
+      z-index: 30;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: pularVencedor 0.6s infinite alternate;
+    }
+
+    @keyframes pularVencedor {
+      from { transform: scale(0.98); }
+      to { transform: scale(1.02); }
     }
 
     .floco {
@@ -174,22 +231,33 @@
     <p class="subtitulo">Descreva a palavra sem dizer os termos proibidos!</p>
   </header>
 
-  <!-- TELA 1: CONFIGURAÇÃO DE JOGADORES -->
+  <!-- TELA 1: CONFIGURAÇÃO DE JOGADORES E RODADAS -->
   <div class="card-principal" id="tela-config">
-    <h2>👥 EQUIPES OU JOGADORES</h2>
-    <p>Adicione os participantes para rodar o jogo de cartas:</p>
+    <h2>👥 CONFIGURAÇÃO DA PARTIDA</h2>
+    <p>Adicione os participantes e defina as regras:</p>
     <div style="display: flex; gap: 10px;">
       <input type="text" id="input-nome" placeholder="Nome do Jogador / Equipa" style="flex: 1;" onkeypress="if(event.key==='Enter')adicionarJogador()">
       <button class="btn" onclick="adicionarJogador()">Adicionar</button>
     </div>
     <div class="lista-nomes" id="lista-jogadores-div">Nenhum participante adicionado ainda.</div>
+    
+    <div class="config-linha">
+      <label>Rodadas por jogador:</label>
+      <input type="number" id="input-rodadas" value="3" min="1" max="10">
+    </div>
+    <div class="config-linha">
+      <label>Tempo por turno (segundos):</label>
+      <input type="number" id="input-tempo" value="60" min="15" max="180" step="5">
+    </div>
+
     <button class="btn" id="btn-iniciar" onclick="iniciarPartida()" style="display: none;">COMEÇAR JOGO 🚀</button>
   </div>
 
   <!-- TELA 2: TURNO DO JOGADOR -->
   <div class="card-principal" id="tela-turno" style="display: none;">
     <h2>🎁 VEZ DE: <span id="span-jogador-vez" style="color: #3498db;"></span></h2>
-    <p>Passe o telemóvel/computador para este jogador em segredo e clique quando estiver pronto!</p>
+    <p id="info-rodada-atual" style="color: #ffd700; font-weight: bold;"></p>
+    <p>Passe o dispositivo para este jogador em segredo e clique quando estiver pronto!</p>
     <button class="btn btn-azul" onclick="mostrarCarta()">VER CARTA SECRETA 🤫</button>
   </div>
 
@@ -210,18 +278,30 @@
       </div>
     </div>
 
-    <div style="display: flex; gap: 10px;">
-      <button class="btn btn-perigo" style="flex: 1;" onclick="proximaCarta(false)">❌ PASSAR (-1)</button>
-      <button class="btn" style="flex: 1;" onclick="proximaCarta(true)">✅ ACERTOU! (+1)</button>
+    <div id="caixa-dica"></div>
+
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-perigo" style="flex: 1;" onclick="proximaCarta(false)">❌ Passar (-1)</button>
+      <button class="btn btn-amarelo" style="flex: 1;" onclick="pedirDica()">💡 Dica (-2 pts)</button>
+      <button class="btn" style="flex: 1;" onclick="proximaCarta(true)">✅ Acertou! (+1)</button>
     </div>
   </div>
 
-  <!-- TELA 4: FIM DO TURNO / PLACAR -->
+  <!-- TELA 4: FIM DO TURNO -->
   <div class="card-principal" id="tela-fim-turno" style="display: none;">
-    <h2>⏰ FIM DO TEMPO!</h2>
-    <p id="resumo-turno" style="font-size: 1.2rem; color: #ffd700;">O jogador marcou X pontos.</p>
-    <div class="lista-nomes" id="placar-geral" style="max-height: 150px;"></div>
-    <button class="btn" onclick="proximoJogadorTurno()">PRÓXIMO JOGADOR ➡️</button>
+    <h2>⏰ FIM DO TURNO!</h2>
+    <p id="resumo-turno" style="font-size: 1.15rem; color: #ffd700;"></p>
+    <div class="lista-nomes" id="placar-geral" style="max-height: 140px;"></div>
+    <button class="btn" onclick="proximoJogadorTurno()">PRÓXIMO TURNO ➡️</button>
+  </div>
+
+  <!-- TELA 5: CARD FINAL DE VENCEDOR -->
+  <div class="caixa-vencedor" id="tela-vencedor" style="display: none;">
+    <div style="font-size: 3rem;">🎅 🏆 🌟 🎁</div>
+    <div style="font-size: 2.4rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 20px #ff2a2a;">TEMOS UM CAMPEÃO!</div>
+    <div id="destaque-campeao" style="font-size: 1.5rem; color: #2ecc71; font-weight: bold;"></div>
+    <div class="lista-nomes" id="placar-final" style="max-height: 160px; background: rgba(0,0,0,0.7); border: 2px solid #ffd700;"></div>
+    <button class="btn" style="font-size: 1.2rem; padding: 14px;" onclick="reiniciarJogoTotal()">🔄 JOGAR NOVAMENTE</button>
   </div>
 
   <div class="pisca-pisca" id="luzes-base"></div>
@@ -269,33 +349,49 @@
         gain.gain.setValueAtTime(0.25, agora);
         gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.3);
         osc.start(agora); osc.stop(agora + 0.3);
+      } else if (tipo === 'vitoria') {
+        const notas = [523.25, 659.25, 783.99, 1046.50];
+        notas.forEach((freq, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, agora + i * 0.12);
+          g.gain.setValueAtTime(0.3, agora + i * 0.12);
+          g.gain.exponentialRampToValueAtTime(0.01, agora + i * 0.12 + 0.3);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(agora + i * 0.12); o.stop(agora + i * 0.12 + 0.3);
+        });
       }
     }
 
-    // Baralho de Cartas Tabu Natalinas
     const BARALHO = [
-      { palavra: "Papai Noel", proibidas: ["Noel", "Presente", "Barba", "Trenó", "Vermelho"] },
-      { palavra: "Árvore de Natal", proibidas: ["Pinheiro", "Estrela", "Enfeite", "Pisca-pisca", "Presente"] },
-      { palavra: "O Grinch", proibidas: ["Verde", "Malvado", "Natal", "Cachorro", "Roubar"] },
-      { palavra: "Panetone", proibidas: ["Doce", "Frutas", "Natal", "Massa", "Caixa"] },
-      { palavra: "Rena Rodolfo", proibidas: ["Nariz", "Vermelho", "Trenó", "Voo", "Animal"] },
-      { palavra: "Chaminé", proibidas: ["Casa", "Fumaça", "Telhado", "Papai Noel", "Tijolo"] },
-      { palavra: "Boneco de Neve", proibidas: ["Gelo", "Frio", "Cenoura", "Chapéu", "Branco"] },
-      { palavra: "Rabanada", proibidas: ["Pão", "Leite", "Óleo", "Açúcar", "Canela"] },
-      { palavra: "Guirlanda", proibidas: ["Porta", "Folhas", "Enfeite", "Redonda", "Natal"] },
-      { palavra: "Duende", proibidas: ["Elfo", "Fábrica", "Brinquedo", "Pequeno", "Papai Noel"] },
-      { palavra: "Peru de Natal", proibidas: ["Ave", "Ceia", "Assado", "Comida", "Prato"] },
-      { palavra: "Sino", proibidas: ["Tocar", "Igreja", "Som", "Metal", "Natal"] }
+      { palavra: "Papai Noel", proibidas: ["Noel", "Presente", "Barba", "Trenó", "Vermelho"], dica: "O bom velhinho que traz presentes na véspera de Natal." },
+      { palavra: "Árvore de Natal", proibidas: ["Pinheiro", "Estrela", "Enfeite", "Pisca-pisca", "Presente"], dica: "A planta enfeitada que fica na sala com presentes embaixo." },
+      { palavra: "O Grinch", proibidas: ["Verde", "Malvado", "Natal", "Cachorro", "Roubar"], dica: "A criatura rançosa que odeia as festas de fim de ano." },
+      { palavra: "Panetone", proibidas: ["Doce", "Frutas", "Natal", "Massa", "Caixa"], dica: "O bolo tradicional recheado com frutas cristalizadas ou chocolate." },
+      { palavra: "Rena Rodolfo", proibidas: ["Nariz", "Vermelho", "Trenó", "Voo", "Animal"], dica: "O animal de chifres que lidera o trenó com seu brilho nasal." },
+      { palavra: "Chaminé", proibidas: ["Casa", "Fumaça", "Telhado", "Papai Noel", "Tijolo"], dica: "A abertura no telhado por onde o bom velhinho entra." },
+      { palavra: "Boneco de Neve", proibidas: ["Gelo", "Frio", "Cenoura", "Chapéu", "Branco"], dica: "A escultura congelada feita no quintal com uma cenoura no rosto." },
+      { palavra: "Rabanada", proibidas: ["Pão", "Leite", "Óleo", "Açúcar", "Canela"], dica: "A fatia de pão frita banhada em leite e ovos, muito comum nas ceias." },
+      { palavra: "Guirlanda", proibidas: ["Porta", "Folhas", "Enfeite", "Redonda", "Natal"], dica: "O arranjo circular pendurado na entrada das casas." },
+      { palavra: "Duende", proibidas: ["Elfo", "Fábrica", "Brinquedo", "Pequeno", "Papai Noel"], dica: "O ajudante de orelhas pontudas que monta os brinquedos no Polo Norte." },
+      { palavra: "Peru de Natal", proibidas: ["Ave", "Ceia", "Assado", "Comida", "Prato"], dica: "O prato principal assado servido na ceia festiva." },
+      { palavra: "Sino", proibidas: ["Tocar", "Igreja", "Som", "Metal", "Natal"], dica: "O objeto metálico que balança e faz 'ding-dong'." }
     ];
 
     let jogadores = [];
     let pontuacoes = {};
+    let rodadasPorJogador = 3;
+    let tempoTurnoConfig = 60;
+    
     let indiceJogadorAtual = 0;
+    let rodadaAtualGlobal = 1;
     let pontosRodada = 0;
     let tempoRestante = 60;
     let timerInterval = null;
     let cartaAtual = null;
     let baralhoEmbaralhado = [];
+    let dicaRevelada = false;
 
     function adicionarJogador() {
       const input = document.getElementById('input-nome');
@@ -326,22 +422,33 @@
     }
 
     function iniciarPartida() {
+      rodadasPorJogador = parseInt(document.getElementById('input-rodadas').value) || 3;
+      tempoTurnoConfig = parseInt(document.getElementById('input-tempo').value) || 60;
       indiceJogadorAtual = 0;
+      rodadaAtualGlobal = 1;
+      jogadores.forEach(j => pontuacoes[j] = 0);
       baralhoEmbaralhado = [...BARALHO].sort(() => Math.random() - 0.5);
       prepararTurno();
     }
 
     function prepararTurno() {
-      document.getElementById('span-jogador-vez').innerText = jogadores[indiceJogadorAtual];
+      const jogador = jogadores[indiceJogadorAtual];
+      document.getElementById('span-jogador-vez').innerText = jogador;
+      document.getElementById('info-rodada-atual').innerText = `Rodada ${rodadaAtualGlobal} de ${rodadasPorJogador} deste jogador`;
       mostrarTela('tela-turno');
     }
 
     function mostrarCarta() {
       pontosRodada = 0;
-      tempoRestante = 60;
+      tempoRestante = tempoTurnoConfig;
+      dicaRevelada = false;
       document.getElementById('pontos-turno').innerText = '0';
-      document.getElementById('tempo-restante').innerText = '60';
+      document.getElementById('tempo-restante').innerText = tempoRestante;
       
+      const caixaDica = document.getElementById('caixa-dica');
+      caixaDica.style.display = 'none';
+      caixaDica.innerText = '';
+
       mostrarTela('tela-jogo');
       sortearProximaCarta();
 
@@ -359,10 +466,27 @@
         baralhoEmbaralhado = [...BARALHO].sort(() => Math.random() - 0.5);
       }
       cartaAtual = baralhoEmbaralhado.pop();
+      dicaRevelada = false;
+      const caixaDica = document.getElementById('caixa-dica');
+      caixaDica.style.display = 'none';
+      caixaDica.innerText = '';
+
       document.getElementById('card-palavra').innerText = cartaAtual.palavra;
       document.getElementById('card-proibidas').innerHTML = cartaAtual.proibidas.map(p => `
         <div class="termo-proibido">❌ ${p}</div>
       `).join('');
+    }
+
+    function pedirDica() {
+      if (dicaRevelada) return;
+      dicaRevelada = true;
+      pontosRodada -= 2; // perde 2 pontos por dica
+      document.getElementById('pontos-turno').innerText = pontosRodada;
+      tocarSom('duende');
+
+      const caixaDica = document.getElementById('caixa-dica');
+      caixaDica.style.display = 'block';
+      caixaDica.innerText = `💡 Dica do Duende: ${cartaAtual.dica}`;
     }
 
     function proximaCarta(acertou) {
@@ -371,7 +495,7 @@
         pontosRodada++;
       } else {
         tocarSom('duende');
-        pontosRodada = Math.max(0, pontosRodada - 1);
+        pontosRodada = Math.max(-5, pontosRodada - 1);
       }
       document.getElementById('pontos-turno').innerText = pontosRodada;
       sortearProximaCarta();
@@ -382,19 +506,46 @@
       const jogador = jogadores[indiceJogadorAtual];
       pontuacoes[jogador] += pontosRodada;
 
-      document.getElementById('resumo-turno').innerText = `${jogador} marcou ${pontosRodada} pontos nesta rodada!`;
+      document.getElementById('resumo-turno').innerText = `${jogador} marcou ${pontosRodada >= 0 ? '+' : ''}${pontosRodada} pontos nesta rodada!`;
       document.getElementById('placar-geral').innerHTML = jogadores.map(j => `<div>👤 ${j}: <b>${pontuacoes[j]} pts</b></div>`).join('');
       
       mostrarTela('tela-fim-turno');
     }
 
     function proximoJogadorTurno() {
-      indiceJogadorAtual = (indiceJogadorAtual + 1) % jogadores.length;
-      prepararTurno();
+      indiceJogadorAtual++;
+      if (indiceJogadorAtual >= jogadores.length) {
+        indiceJogadorAtual = 0;
+        rodadaAtualGlobal++;
+      }
+
+      if (rodadaAtualGlobal > rodadasPorJogador) {
+        exibirTelaVencedor();
+      } else {
+        prepararTurno();
+      }
+    }
+
+    function exibirTelaVencedor() {
+      tocarSom('vitoria');
+      const ranking = [...jogadores].sort((a, b) => pontuacoes[b] - pontuacoes[a]);
+      const campeao = ranking[0];
+
+      document.getElementById('destaque-campeao').innerText = `🥇 ${campeao} com ${pontuacoes[campeao]} pontos! 🎉`;
+      document.getElementById('placar-final').innerHTML = ranking.map((j, i) => `
+        <div>${i === 0 ? '👑' : `#${i+1}`} 👤 ${j} — <b>${pontuacoes[j]} pts</b></div>
+      `).join('');
+
+      mostrarTela('tela-vencedor');
+    }
+
+    function reiniciarJogoTotal() {
+      mostrarTela('tela-config');
+      atualizarListaUI();
     }
 
     function mostrarTela(id) {
-      ['tela-config', 'tela-turno', 'tela-jogo', 'tela-fim-turno'].forEach(t => {
+      ['tela-config', 'tela-turno', 'tela-jogo', 'tela-fim-turno', 'tela-vencedor'].forEach(t => {
         document.getElementById(t).style.display = (t === id) ? 'flex' : 'none';
       });
     }

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Quem é o Grinch? 🎄 Impostor Natalino</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: radial-gradient(circle at center, #143d59 0%, #061826 90%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      border: 14px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #ffd700, #ffd700 20px, #c41e3a 20px, #c41e3a 40px) 14;
+      transition: background 0.3s ease;
+    }
+
+    body.alerta-vermelho-ativo {
+      background: radial-gradient(circle at center, #b81414 0%, #420404 90%) !important;
+    }
+
+    .pisca-pisca {
+      width: 100%; display: flex; justify-content: space-around; padding: 4px 20px; z-index: 4;
+    }
+    .luz {
+      width: 14px; height: 20px; border-radius: 50%;
+      animation: piscar 0.5s infinite alternate;
+    }
+    .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 12px #ff2a2a; }
+    .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 12px #ffd700; animation-delay: 0.1s; }
+    .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 12px #2ecc71; animation-delay: 0.2s; }
+    .luz:nth-child(4n+4) { background: #3498db; box-shadow: 0 0 12px #3498db; animation-delay: 0.3s; }
+
+    @keyframes piscar {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.3); }
+    }
+
+    header { z-index: 4; margin-top: 5px; width: 90%; }
+    
+    .banner-topo-decorado {
+      font-size: 1.6rem;
+      letter-spacing: 4px;
+      margin-bottom: 2px;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.8));
+    }
+
+    h1 { font-size: 1.8rem; color: #ffd700; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+
+    .card {
+      background: rgba(0, 0, 0, 0.78);
+      border: 3px solid #ffd700;
+      border-radius: 20px;
+      padding: 22px;
+      max-width: 520px;
+      width: 90%;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 10;
+      margin: auto;
+    }
+
+    h2 { font-size: 1.3rem; color: #2ecc71; }
+    p { font-size: 0.95rem; line-height: 1.4; color: #ddd; }
+
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 2px solid #ffd700;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      text-align: center;
+      outline: none;
+    }
+    input::placeholder { color: rgba(255,255,255,0.5); }
+
+    .btn {
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .btn:hover { transform: scale(1.05); background: #27ae60; }
+    .btn-perigo { background: #c41e3a; box-shadow: 0 0 15px rgba(196, 30, 58, 0.6); }
+    .btn-perigo:hover { background: #a01830; }
+    .btn-secundario { background: #3498db; box-shadow: 0 0 15px rgba(52, 152, 219, 0.6); }
+    .btn-secundario:hover { background: #2980b9; }
+    .btn-alerta { background: #e74c3c; box-shadow: 0 0 20px #e74c3c; animation: pulsarAlerta 0.8s infinite alternate; }
+
+    @keyframes pulsarAlerta {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.06); }
+    }
+
+    .lista-nomes {
+      max-height: 100px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.4);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 0.9rem;
+      text-align: left;
+      border: 1px solid rgba(255,215,0,0.3);
+    }
+    .lista-nomes div { padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+    .secreto-box {
+      font-size: 1.3rem;
+      padding: 15px;
+      background: rgba(255, 215, 0, 0.1);
+      border: 2px dashed #ffd700;
+      border-radius: 15px;
+      color: #ffd700;
+      font-weight: bold;
+    }
+
+    .painel-extra {
+      background: rgba(52, 152, 219, 0.15);
+      border: 1px solid #3498db;
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 0.85rem;
+      color: #3498db;
+      font-weight: bold;
+    }
+
+    .painel-suspeito {
+      background: rgba(231, 76, 60, 0.2);
+      border: 2px solid #e74c3c;
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 0.95rem;
+      color: #ff6b6b;
+      font-weight: bold;
+    }
+
+    .floco {
+      position: absolute; top: -50px; color: #ffffff; user-select: none; pointer-events: none; z-index: 1; opacity: 0.5; animation: nevar linear infinite;
+    }
+    @keyframes nevar {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(110vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="pisca-pisca" id="luzes-topo"></div>
+
+  <header>
+    <div class="banner-topo-decorado">🎅 🎄 🎁 🧦 ⛄ ⭐</div>
+    <h1>QUEM É O GRINCH? (IMPOSTOR)</h1>
+  </header>
+
+  <!-- TELA 1: CONFIGURAÇÃO DE JOGADORES -->
+  <div class="card" id="tela-config">
+    <h2>👥 PARTICIPANTES</h2>
+    <p>Adicione os nomes (mínimo 3). O Grinch será sorteado aleatoriamente!</p>
+    <div style="display: flex; gap: 10px;">
+      <input type="text" id="input-nome" placeholder="Nome do jogador" style="flex: 1;" onkeypress="if(event.key==='Enter')adicionarJogador()">
+      <button class="btn" onclick="adicionarJogador()">Adicionar</button>
+    </div>
+    <div class="lista-nomes" id="lista-jogadores-div">Nenhum jogador adicionado ainda.</div>
+    <button class="btn" id="btn-iniciar" onclick="iniciarJogo()" style="display: none;">COMEÇAR JOGO 🚀</button>
+  </div>
+
+  <!-- TELA 2: PASSAR O APARELHO -->
+  <div class="card" id="tela-passar" style="display: none;">
+    <h2>🎁 VEZ DE: <span id="span-jogador-atual" style="color: #3498db;"></span></h2>
+    <p>Passe o telemóvel para este jogador em segredo!</p>
+    <button class="btn" onclick="revelarPapel()">VER MEU PAPEL SECRETO 🤫</button>
+  </div>
+
+  <!-- TELA 3: MOSTRAR PAPEL OU GRINCH -->
+  <div class="card" id="tela-papel" style="display: none;">
+    <h2>🔍 O SEU PAPEL</h2>
+    <div class="secreto-box" id="caixa-papel">Palavra Secreta</div>
+    <p id="instrucao-papel">Guarde bem na memória!</p>
+    <button class="btn btn-perigo" onclick="proximoJogador()">ESCONDER E PASSAR 🔒</button>
+  </div>
+
+  <!-- TELA 4: FASE DE DEBATE COM ALERTA E VEZ DE FALAR -->
+  <div class="card" id="tela-jogo" style="display: none;">
+    <h2>💬 DEBATE NATALINO</h2>
+    <p>Tema secreto: <b id="tema-atual" style="color: #ffd700;"></b></p>
+    
+    <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px; border: 1px solid #ffd700;">
+      <p style="font-size: 0.9rem; color: #ffd700;">Vez atual de dar a dica:</p>
+      <div id="vez-falando" style="font-size: 1.2rem; font-weight: bold; color: #2ecc71; margin-bottom: 6px;">-</div>
+      <button class="btn" style="padding: 6px 14px; font-size: 0.9rem;" onclick="avancarTurno()">PRÓXIMO A FALAR ➡️</button>
+    </div>
+
+    <div class="painel-suspeito" id="painel-suspeito" style="display: none;">
+      🚨 SUSPEITO ACUSADO: <span id="nome-suspeito" style="color: #fff;">Ninguém</span>
+    </div>
+
+    <div class="painel-extra">
+      💡 Dica extra: <span id="texto-dica-extra" style="color:#fff;">Clique no botão abaixo se travar!</span>
+    </div>
+    
+    <div style="display: flex; gap: 8px; justify-content: center;">
+      <button class="btn btn-secundario" style="font-size: 0.85rem; padding: 6px 10px; flex: 1;" onclick="gerarDicaExtra()">🎲 Inspiração</button>
+      <button class="btn btn-alerta" style="font-size: 0.85rem; padding: 6px 10px; flex: 1;" onclick="acionarAlertaVermelho()">🚨 ALERTA SUSPEITO</button>
+    </div>
+    
+    <button class="btn btn-perigo" onclick="revelarResultadoFinal()">QUEM ERA O GRINCH? 🕵️‍♂️</button>
+  </div>
+
+  <!-- TELA 5: REVELAÇÃO E PLACAR -->
+  <div class="card" id="tela-fim" style="display: none;">
+    <h2>👑 FIM DA PARTIDA! 👑</h2>
+    <div class="secreto-box" id="texto-revelacao">O Grinch era...</div>
+    <div id="placar-parcial" style="font-size: 0.9rem; color: #ffd700;"></div>
+    <button class="btn" onclick="reiniciarPartida()">JOGAR NOVAMENTE 🔄</button>
+  </div>
+
+  <div class="pisca-pisca" id="luzes-base"></div>
+
+  <script>
+    function criarLuzes(id) {
+      const el = document.getElementById(id);
+      for (let i = 0; i < 14; i++) {
+        const l = document.createElement('div'); l.className = 'luz'; el.appendChild(l);
+      }
+    }
+    criarLuzes('luzes-topo');
+    criarLuzes('luzes-base');
+
+    const simbolosNeve = ['❄', '❅', '❆'];
+    for (let i = 0; i < 20; i++) {
+      const floco = document.createElement('div');
+      floco.className = 'floco';
+      floco.innerText = simbolosNeve[Math.floor(Math.random() * simbolosNeve.length)];
+      floco.style.left = Math.random() * 100 + 'vw';
+      floco.style.fontSize = (Math.random() * 16 + 10) + 'px';
+      floco.style.animationDuration = (Math.random() * 6 + 5) + 's';
+      document.body.appendChild(floco);
+    }
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function tocarAlarme() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      let agora = audioCtx.currentTime;
+      for (let i = 0; i < 3; i++) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(800, agora + (i * 0.2));
+        osc.frequency.setValueAtTime(500, agora + (i * 0.2) + 0.1);
+        gain.gain.setValueAtTime(0.3, agora + (i * 0.2));
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + (i * 0.2) + 0.18);
+        osc.start(agora + (i * 0.2));
+        osc.stop(agora + (i * 0.2) + 0.18);
+      }
+    }
+
+    const categoriasPalavras = [
+      { tema: "Objetos de Natal", palavras: ["Trenó", "Chaminé", "Panetone", "Árvore", "Estrela", "Bota", "Guirlanda", "Vela"] },
+      { tema: "Personagens & Símbolos", palavras: ["Pai Natal", "Reno Rudolph", "Duende", "Boneco de Neve", "Anjo", "Grinch"] },
+      { tema: "Comidas Natalinas", palavras: ["Peru", "Rabanada", "Bauducco", "Peru de Natal", "Castanha", "Vinho Quente"] }
+    ];
+
+    let jogadores = [];
+    let pontuacoes = {};
+    let indiceAtual = 0;
+    let turnoDebateIdx = 0;
+    let categoriaAtual = null;
+    let palavraSecreta = "";
+    let indiceGrinch = 0;
+
+    function adicionarJogador() {
+      const input = document.getElementById('input-nome');
+      const nome = input.value.trim();
+      if (nome && !jogadores.includes(nome)) {
+        jogadores.push(nome);
+        pontuacoes[nome] = 0;
+        input.value = '';
+        atualizarListaUI();
+      }
+    }
+
+    function atualizarListaUI() {
+      const listaDiv = document.getElementById('lista-jogadores-div');
+      const btnIniciar = document.getElementById('btn-iniciar');
+      if (jogadores.length === 0) {
+        listaDiv.innerHTML = "Nenhum jogador adicionado ainda.";
+        btnIniciar.style.display = 'none';
+      } else {
+        listaDiv.innerHTML = jogadores.map((j, i) => `<div>${i+1}. 👤 ${j} (${pontuacoes[j]} pts)</div>`).join('');
+        if (jogadores.length >= 3) {
+          btnIniciar.style.display = 'block';
+        } else {
+          btnIniciar.style.display = 'none';
+          listaDiv.innerHTML += `<br><span style="color:#ffd700; font-size:0.8rem;">⚠️ Adicione pelo menos 3 jogadores.</span>`;
+        }
+      }
+    }
+
+    function iniciarJogo() {
+      categoriaAtual = categoriasPalavras[Math.floor(Math.random() * categoriasPalavras.length)];
+      palavraSecreta = categoriaAtual.palavras[Math.floor(Math.random() * categoriaAtual.palavras.length)];
+      indiceGrinch = Math.floor(Math.random() * jogadores.length);
+      
+      indiceAtual = 0;
+      turnoDebateIdx = 0;
+      document.getElementById('tema-atual').innerText = categoriaAtual.tema;
+      document.getElementById('texto-dica-extra').innerText = "Clique abaixo se precisar de ajuda!";
+      document.getElementById('painel-suspeito').style.display = 'none';
+      
+      mostrarTela('tela-passar');
+      document.getElementById('span-jogador-atual').innerText = jogadores[indiceAtual];
+    }
+
+    function revelarPapel() {
+      const caixa = document.getElementById('caixa-papel');
+      const instrucao = document.getElementById('instrucao-papel');
+      
+      if (indiceAtual === indiceGrinch) {
+        caixa.innerText = "👹 VOCÊ É O GRINCH!";
+        caixa.style.color = "#ff4d4d";
+        caixa.style.borderColor = "#ff4d4d";
+        instrucao.innerText = "Você não sabe a palavra secreta! Finja que sabe e invente uma dica.";
+      } else {
+        caixa.innerText = `🎁 Palavra: ${palavraSecreta}`;
+        caixa.style.color = "#ffd700";
+        caixa.style.borderColor = "#ffd700";
+        instrucao.innerText = `Tema: ${categoriaAtual.tema}. Diga uma dica sem revelar diretamente.`;
+      }
+      mostrarTela('tela-papel');
+    }
+
+    function proximoJogador() {
+      indiceAtual++;
+      if (indiceAtual < jogadores.length) {
+        document.getElementById('span-jogador-atual').innerText = jogadores[indiceAtual];
+        mostrarTela('tela-passar');
+      } else {
+        mostrarTela('tela-jogo');
+        atualizarTurnoUI();
+      }
+    }
+
+    function atualizarTurnoUI() {
+      document.getElementById('vez-falando').innerText = `🗣️ ${jogadores[turnoDebateIdx]}`;
+    }
+
+    function avancarTurno() {
+      turnoDebateIdx = (turnoDebateIdx + 1) % jogadores.length;
+      atualizarTurnoUI();
+    }
+
+    function acionarAlertaVermelho() {
+      tocarAlarme();
+      document.body.classList.add('alerta-vermelho-ativo');
+
+      let idxAnterior = (turnoDebateIdx - 1 + jogadores.length) % jogadores.length;
+      let nomeAnterior = jogadores[idxAnterior];
+
+      document.getElementById('nome-suspeito').innerText = nomeAnterior;
+      document.getElementById('painel-suspeito').style.display = 'block';
+
+      setTimeout(() => {
+        document.body.classList.remove('alerta-vermelho-ativo');
+      }, 3000);
+    }
+
+    function gerarDicaExtra() {
+      const ideias = [
+        "Fale sobre o material ou cor (ex: vermelho, brilhante, doce)",
+        "Fale onde costuma encontrar isso (ex: sala, cozinha, neve)",
+        "Faça uma imitação ou som curto",
+        "Diga se é algo pesado ou leve"
+      ];
+      const sorteio = ideias[Math.floor(Math.random() * ideias.length)];
+      document.getElementById('texto-dica-extra').innerText = sorteio;
+    }
+
+    function revelarResultadoFinal() {
+      const textoRev = document.getElementById('texto-revelacao');
+      const nomeGrinch = jogadores[indiceGrinch];
+      
+      textoRev.innerHTML = `O Grinch era:<br><span style="color: #ff4d4d; font-size: 1.7rem;">👹 ${nomeGrinch}</span><br><br><span style="font-size: 0.9rem; color: #fff;">A palavra secreta era: <b>${palavraSecreta}</b></span>`;
+      
+      let placarTexto = "🏆 **Placar Acumulado:**<br>";
+      jogadores.forEach(j => {
+        if(j === nomeGrinch) {
+          pontuacoes[j] += 150; 
+        } else {
+          pontuacoes[j] += 50;
+        }
+        placarTexto += `${j}: ${pontuacoes[j]} pts | `;
+      });
+      document.getElementById('placar-parcial').innerHTML = placarTexto;
+
+      mostrarTela('tela-fim');
+      atualizarListaUI();
+    }
+
+    function reiniciarPartida() {
+      mostrarTela('tela-config');
+    }
+
+    function mostrarTela(idTela) {
+      ['tela-config', 'tela-passar', 'tela-papel', 'tela-jogo', 'tela-fim'].forEach(t => {
+        document.getElementById(t).style.display = (t === idTela) ? 'flex' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

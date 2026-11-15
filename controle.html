@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Controle Celular • Corrida de Trenó 📱🛷</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: radial-gradient(circle at center, #143d59 0%, #061826 95%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px;
+      text-align: center;
+    }
+
+    h1 { font-size: 1.4rem; color: #ffd700; margin-bottom: 6px; }
+    .sub { font-size: 0.88rem; color: #cbd5e1; margin-bottom: 12px; }
+
+    #tela-escolha { width: 100%; max-width: 480px; }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 2px solid #ffd700;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: bold;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    #grid-personagens {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .card-char {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,215,0,0.35);
+      border-radius: 14px;
+      padding: 8px 4px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .card-char.selecionado {
+      border-color: #2ecc71;
+      background: rgba(46, 204, 113, 0.25);
+      transform: scale(1.05);
+    }
+    .char-icone { font-size: 2rem; }
+    .char-nome { font-size: 0.78rem; font-weight: bold; color: #ffd700; margin-top: 2px; }
+    .char-attr { font-size: 0.65rem; color: #cbd5e1; }
+
+    .btn-principal {
+      width: 100%;
+      background: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 15px;
+      border-radius: 26px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(46, 204, 113, 0.5);
+    }
+
+    /* Tela de Controle Ativo com Câmera + Alerta de Palma da Mão */
+    #tela-controle {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #box-camera-celular {
+      position: relative;
+      width: 100%;
+      height: 310px;
+      border: 4px solid #ffd700;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #canvas-celular {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    #alerta-presente {
+      display: none;
+      background: linear-gradient(45deg, #c41e3a, #ffd700);
+      color: #061826;
+      padding: 12px;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 1rem;
+      animation: pulsar 0.6s infinite alternate;
+    }
+
+    @keyframes pulsar {
+      0% { transform: scale(0.98); }
+      100% { transform: scale(1.03); }
+    }
+
+    .indicadores-comando {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    .ind-box {
+      background: rgba(0,0,0,0.6);
+      border: 2px solid #334155;
+      border-radius: 12px;
+      padding: 8px 4px;
+    }
+    .ind-box.ativo { border-color: #2ecc71; color: #2ecc71; }
+
+    #webcam { display: none; }
+  </style>
+</head>
+<body>
+
+  <h1>🛷 CORRIDA DE TRENÓ MALUCA</h1>
+  <p class="sub" id="status-conexao">Conectando à TV...</p>
+
+  <!-- Etapa 1: Escolher Nome e Personagem -->
+  <div id="tela-escolha">
+    <input type="text" id="input-nome" placeholder="Digite seu apelido..." maxlength="14">
+    <div id="grid-personagens"></div>
+    <button class="btn-principal" onclick="entrarNaCorrida()">📷 ATIVAR CÂMERA E ENTRAR</button>
+  </div>
+
+  <!-- Etapa 2: Câmera do Celular Rastreando Cabeça + Palma da Mão -->
+  <div id="tela-controle">
+    <div id="alerta-presente">
+      🎁 PRESENTE COLETADO! ABRA A PALMA DA MÃO NA CÂMERA (<span id="tempo-item">12</span>s)
+    </div>
+
+    <div id="box-camera-celular">
+      <canvas id="canvas-celular" width="480" height="360"></canvas>
+    </div>
+
+    <div class="indicadores-comando">
+      <div class="ind-box" id="ind-dir">↔️ DIREÇÃO: CENTRO</div>
+      <div class="ind-box" id="ind-freio">🛑 FREIO: OFF</div>
+      <div class="ind-box" id="ind-pulo">🦘 PULO: PRONTO</div>
+    </div>
+
+    <p style="font-size:0.78rem; color:#94a3b8;">
+      Incline a cabeça p/ trocar de pista • Abaixe p/ frear • Pule p/ saltar • Abra a palma da mão p/ usar o presente!
+    </p>
+  </div>
+
+  <video id="webcam" autoplay playsinline></video>
+
+  <script>
+    const PERSONAGENS = [
+      { id: 0, nome: 'Papai Noel', icone: '🎅', attr: 'Equilibrado' },
+      { id: 1, nome: 'Mamãe Noel', icone: '🤶', attr: 'Aceleração +' },
+      { id: 2, nome: 'Rena Rodolfo', icone: '🦌', attr: 'Velocidade +' },
+      { id: 3, nome: 'Duende Chefe', icone: '🧝', attr: 'Troca Rápida' },
+      { id: 4, nome: 'Boneco Neve', icone: '⛄', attr: 'Deslize Suave' },
+      { id: 5, nome: 'O Grinch', icone: '💚', attr: 'Turbo Extra' },
+      { id: 6, nome: 'Biscoito', icone: '🍪', attr: 'Super Leve' },
+      { id: 7, nome: 'Pinguim', icone: '🐧', attr: 'Estável' },
+      { id: 8, nome: 'Urso Polar', icone: '🐻‍❄️', attr: 'Pesado' },
+      { id: 9, nome: 'Fada Doce', icone: '🧚', attr: 'Ímã de Itens' },
+      { id: 10, nome: 'Quebra-Nozes', icone: '💂', attr: 'Precisão' },
+      { id: 11, nome: 'Yeti Neves', icone: '🦍', attr: 'Força Bruta' }
+    ];
+
+    let charSelecionado = 0;
+    let meuSlot = 0;
+    let connTV = null;
+    let baseCabecaY = null;
+    let temItemAtivo = false;
+
+    // Renderizar 12 personagens no celular
+    const gridEl = document.getElementById('grid-personagens');
+    PERSONAGENS.forEach((p, idx) => {
+      const card = document.createElement('div');
+      card.className = 'card-char' + (idx === 0 ? ' selecionado' : '');
+      card.innerHTML = `
+        <div class="char-icone">${p.icone}</div>
+        <div class="char-nome">${p.nome}</div>
+        <div class="char-attr">${p.attr}</div>
+      `;
+      card.onclick = () => {
+        charSelecionado = p.id;
+        document.querySelectorAll('.card-char').forEach((c, i) => {
+          c.classList.toggle('selecionado', i === idx);
+        });
+      };
+      gridEl.appendChild(card);
+    });
+
+    // Conecta à sala da TV via parâmetro ?sala=XXXX
+    const params = new URLSearchParams(window.location.search);
+    const salaId = params.get('sala');
+    const peer = new Peer();
+
+    peer.on('open', () => {
+      if (!salaId) {
+        document.getElementById('status-conexao').innerText = '⚠️ Abra este link escaneando o QR Code da TV!';
+        return;
+      }
+      connTV = peer.connect(salaId);
+      connTV.on('open', () => {
+        document.getElementById('status-conexao').innerText = '🟢 Conectado à TV! Escolha seu nome e personagem:';
+      });
+
+      connTV.on('data', (msg) => {
+        if (msg.tipo === 'confirmado') {
+          meuSlot = msg.slot;
+          document.getElementById('box-camera-celular').style.borderColor = msg.cor;
+          document.getElementById('status-conexao').innerText = `Você é o P${meuSlot + 1} (${msg.char.icone} ${msg.char.nome})! Olhe para a TV!`;
+        } else if (msg.tipo === 'sala_cheia') {
+          alert('A sala na TV já está com todos os jogadores!');
+        } else if (msg.tipo === 'item_atualizado') {
+          const alertaEl = document.getElementById('alerta-presente');
+          if (msg.item) {
+            temItemAtivo = true;
+            alertaEl.style.display = 'block';
+            alertaEl.innerHTML = `🎁 ${msg.item.nome}! ABRA A PALMA DA MÃO (${msg.tempo}s)`;
+          } else {
+            temItemAtivo = false;
+            alertaEl.style.display = 'none';
+          }
+        }
+      });
+    });
+
+    const videoElement = document.getElementById('webcam');
+    const canvasCel = document.getElementById('canvas-celular');
+    const ctxCel = canvasCel.getContext('2d');
+
+    // MediaPipe Holistic: Rastreia Pose (cabeça/pulo) + Mãos (palma aberta para usar o presente!)
+    const holistic = new Holistic({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
+    });
+    holistic.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      minDetectionConfidence: 0.55,
+      minTrackingConfidence: 0.55
+    });
+
+    function verificarPalmaAberta(handLandmarks) {
+      if (!handLandmarks) return false;
+      // Verifica se os 4 dedos principais (indicador, médio, anelar, mínimo) estão estendidos acima das juntas médias
+      const dedos = [
+        [8, 6],   // Indicador
+        [12, 10], // Médio
+        [16, 14], // Anelar
+        [20, 18]  // Mínimo
+      ];
+      let estendidos = 0;
+      dedos.forEach(([ponta, meio]) => {
+        if (handLandmarks[ponta].y < handLandmarks[meio].y) estendidos++;
+      });
+      return estendidos >= 4;
+    }
+
+    holistic.onResults((results) => {
+      ctxCel.save();
+      ctxCel.clearRect(0, 0, canvasCel.width, canvasCel.height);
+      ctxCel.drawImage(results.image, 0, 0, canvasCel.width, canvasCel.height);
+
+      let dirX = 0;
+      let freio = false;
+      let pulo = false;
+      let usarPoder = false;
+
+      if (results.poseLandmarks) {
+        const lm = results.poseLandmarks;
+        const nariz = lm[0];
+        const ombroEsq = lm[11];
+        const ombroDir = lm[12];
+
+        const centroOmbrosX = (ombroEsq.x + ombroDir.x) / 2;
+        const centroOmbrosY = (ombroEsq.y + ombroDir.y) / 2;
+
+        ctxCel.beginPath();
+        ctxCel.arc(nariz.x * canvasCel.width, nariz.y * canvasCel.height, 10, 0, Math.PI * 2);
+        ctxCel.fillStyle = '#ffd700';
+        ctxCel.fill();
+
+        // 1. Inclinar a cabeça para Esquerda / Direita
+        const inclinacao = nariz.x - centroOmbrosX;
+        if (inclinacao > 0.032) {
+          dirX = -1;
+          document.getElementById('ind-dir').innerText = '⬅️ ESQUERDA';
+        } else if (inclinacao < -0.032) {
+          dirX = 1;
+          document.getElementById('ind-dir').innerText = '➡️ DIREITA';
+        } else {
+          dirX = 0;
+          document.getElementById('ind-dir').innerText = '⬆️ CENTRO';
+        }
+
+        // 2. Abaixar a cabeça -> Freio
+        freio = (centroOmbrosY - nariz.y) < 0.085;
+        document.getElementById('ind-freio').innerText = freio ? '🛑 FREANDO' : '🛑 FREIO: OFF';
+        document.getElementById('ind-freio').classList.toggle('ativo', freio);
+
+        // 3. Pular -> Saltar obstáculos
+        if (baseCabecaY === null) {
+          baseCabecaY = nariz.y;
+        } else {
+          if (nariz.y > baseCabecaY - 0.03) {
+            baseCabecaY = baseCabecaY * 0.94 + nariz.y * 0.06;
+          }
+          if ((baseCabecaY - nariz.y) > 0.055) {
+            pulo = true;
+            document.getElementById('ind-pulo').innerText = '🦘 PULANDO!';
+            document.getElementById('ind-pulo').classList.add('ativo');
+            setTimeout(() => {
+              document.getElementById('ind-pulo').innerText = '🦘 PULO: PRONTO';
+              document.getElementById('ind-pulo').classList.remove('ativo');
+            }, 500);
+          }
+        }
+      }
+
+      // 4. Palma da mão aberta -> Dispara o item coletado!
+      if (temItemAtivo && (verificarPalmaAberta(results.leftHandLandmarks) || verificarPalmaAberta(results.rightHandLandmarks))) {
+        usarPoder = true;
+        temItemAtivo = false;
+      }
+
+      if (connTV && connTV.open) {
+        connTV.send({
+          tipo: 'comando',
+          slot: meuSlot,
+          dirX,
+          freio,
+          pulo,
+          usarPoder
+        });
+      }
+
+      ctxCel.restore();
+    });
+
+    async function entrarNaCorrida() {
+      const nome = document.getElementById('input-nome').value.trim() || 'Piloto';
+      document.getElementById('tela-escolha').style.display = 'none';
+      document.getElementById('tela-controle').style.display = 'flex';
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: 480, height: 360 },
+        audio: false
+      });
+      videoElement.srcObject = stream;
+
+      const camera = new Camera(videoElement, {
+        onFrame: async () => {
+          await holistic.send({ image: videoElement });
+        },
+        width: 480,
+        height: 360
+      });
+      camera.start();
+
+      if (connTV && connTV.open) {
+        connTV.send({ tipo: 'entrar', nome, charId: charSelecionado });
+        // Envia também o vídeo ao vivo da câmera frontal do celular para o quadrante na TV!
+        peer.call(salaId, stream);
+      }
+    }
+  </script>
+</body>
+</html>

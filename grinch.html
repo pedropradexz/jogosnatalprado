@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>O Grinch Vai Te Ver?</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: radial-gradient(circle at center, #1b4d24 0%, #071f0c 90%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      transition: background 0.3s ease;
+      border: 14px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #c41e3a, #c41e3a 20px, #ffffff 20px, #ffffff 40px) 14;
+    }
+
+    body.estado-verde { background: radial-gradient(circle at center, #1e8236 0%, #093614 90%); }
+    body.estado-vermelho { background: radial-gradient(circle at center, #b81414 0%, #420404 90%); }
+    body.travado-alerta { background: #300000 !important; }
+    body.travado-vitoria { background: #0b3b17 !important; }
+
+    .pisca-pisca {
+      width: 100%; display: flex; justify-content: space-around; padding: 10px 20px; z-index: 4;
+    }
+    .luz {
+      width: 16px; height: 24px; border-radius: 50%;
+      animation: piscar 1.2s infinite alternate;
+    }
+    body.travado-alerta .luz, body.travado-vitoria .luz { animation: none !important; opacity: 0.3; }
+
+    .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 15px #ff2a2a; }
+    .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 15px #ffd700; animation-delay: 0.3s; }
+    .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 15px #2ecc71; animation-delay: 0.6s; }
+    .luz:nth-child(4n+4) { background: #3498db; box-shadow: 0 0 15px #3498db; animation-delay: 0.9s; }
+
+    @keyframes piscar {
+      0% { opacity: 0.35; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.15); }
+    }
+
+    header { z-index: 4; margin-top: 5px; }
+    h1 { font-size: 2.5rem; color: #ffd700; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+    #badge-modo {
+      display: inline-block; margin-top: 4px; padding: 4px 15px; border-radius: 20px;
+      background: rgba(0,0,0,0.45); border: 2px solid #ffd700; font-size: 1rem; color: #ffd700;
+    }
+
+    #palco {
+      z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 90%;
+    }
+
+    .circulo-grinch {
+      width: 220px; height: 220px; border-radius: 50%; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; border: 8px solid #ffd700;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8); transition: all 0.2s ease; background: rgba(0,0,0,0.35);
+    }
+
+    .estado-verde .circulo-grinch { border-color: #2ecc71; box-shadow: 0 0 50px rgba(46, 204, 113, 0.8); }
+    .estado-vermelho .circulo-grinch { border-color: #ff2a2a; box-shadow: 0 0 60px rgba(255, 42, 42, 0.9); transform: scale(1.05); }
+
+    #avatar-grinch { font-size: 6.5rem; line-height: 1; }
+    .estado-verde #avatar-grinch { filter: brightness(0.7); }
+
+    #status-texto {
+      margin-top: 12px; font-size: 2.6rem; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 2px; padding: 8px 18px; border-radius: 25px; border: 3px solid #ffd700;
+      background: rgba(0,0,0,0.55); text-shadow: 0 4px 12px rgba(0,0,0,0.9); width: 100%;
+    }
+    .estado-verde #status-texto { color: #2ecc71; border-color: #2ecc71; }
+    .estado-vermelho #status-texto { color: #ff4d4d; border-color: #ff2a2a; animation: tremer 0.3s ease-in-out; }
+
+    @keyframes tremer {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    #subtitulo-acao { margin-top: 6px; font-size: 1.3rem; color: #ffffff; opacity: 0.9; }
+
+    /* Visão da Câmera Ampliada e com Zoom Gigante ao Ser Pego */
+    .monitor-camera {
+      position: relative;
+      width: 360px;
+      height: 240px;
+      border: 4px solid #ffd700;
+      border-radius: 15px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+      z-index: 25;
+      margin-bottom: 8px;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .monitor-camera canvas {
+      width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+    }
+    .monitor-camera.alerta-flagra {
+      border-color: #ff2a2a;
+      box-shadow: 0 0 50px #ff2a2a;
+      transform: scale(1.6); /* Zoom gigante mantido durante todo o alerta */
+    }
+    .legenda-monitor {
+      position: absolute; bottom: 2px; left: 0; right: 0;
+      font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.75); color: #ffd700; text-align: center;
+    }
+
+    #overlay-evento {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.92); z-index: 20; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+      padding-bottom: 220px;
+    }
+    #overlay-icone { font-size: 6rem; margin-bottom: 8px; }
+    #overlay-titulo { font-size: 3.2rem; font-weight: 900; color: #ffd700; margin-bottom: 8px; }
+    #overlay-desc { font-size: 1.6rem; color: #fff; }
+
+    .controles-legenda {
+      z-index: 4; font-size: 0.8rem; color: rgba(255,255,255,0.65);
+      background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 20px; margin-bottom: 6px;
+    }
+
+    #webcam { display: none; }
+
+    .floco {
+      position: absolute; top: -50px; color: #ffffff; user-select: none; pointer-events: none; z-index: 1; opacity: 0.6; animation: nevar linear infinite;
+    }
+    @keyframes nevar {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(110vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="estado-vermelho">
+
+  <div class="pisca-pisca" id="luzes-topo"></div>
+
+  <header>
+    <h1>🟢 O GRINCH VAI TE VER? 🔴</h1>
+    <div id="badge-modo">Modo: Manual (Aperte ESPAÇO)</div>
+  </header>
+
+  <div id="palco">
+    <div class="circulo-grinch">
+      <div id="avatar-grinch">👹</div>
+    </div>
+    <div id="status-texto">🛑 ESTÁTUA!</div>
+    <div id="subtitulo-acao">O Grinch virou! Não se mexa!</div>
+  </div>
+
+  <div class="monitor-camera" id="caixa-monitor">
+    <canvas id="canvas-camera" width="640" height="480"></canvas>
+    <div class="legenda-monitor" id="texto-camera">Aperte [C] para ligar a câmera</div>
+  </div>
+
+  <div class="controles-legenda">
+    [ESPAÇO] Virar &nbsp;|&nbsp; [A] Automático &nbsp;|&nbsp; [C] Ligar Câmera &nbsp;|&nbsp; [X] Alguém Mexeu &nbsp;|&nbsp; [V] Vitória
+  </div>
+
+  <div class="pisca-pisca" id="luzes-base"></div>
+
+  <div id="overlay-evento">
+    <div id="overlay-icone">🚨</div>
+    <div id="overlay-titulo">PEGUEI VOCÊ!</div>
+    <div id="overlay-desc">Movimento detectado!</div>
+  </div>
+
+  <video id="webcam" autoplay playsinline></video>
+  <audio id="audio-fala" src="grinch-fala.mp3"></audio>
+
+  <script>
+    function criarLuzes(id) {
+      const el = document.getElementById(id);
+      for (let i = 0; i < 14; i++) {
+        const l = document.createElement('div'); l.className = 'luz'; el.appendChild(l);
+      }
+    }
+    criarLuzes('luzes-topo');
+    criarLuzes('luzes-base');
+
+    const simbolosNeve = ['❄', '❅', '❆'];
+    for (let i = 0; i < 20; i++) {
+      const floco = document.createElement('div');
+      floco.className = 'floco';
+      floco.innerText = simbolosNeve[Math.floor(Math.random() * simbolosNeve.length)];
+      floco.style.left = Math.random() * 100 + 'vw';
+      floco.style.fontSize = (Math.random() * 16 + 10) + 'px';
+      floco.style.animationDuration = (Math.random() * 6 + 5) + 's';
+      document.body.appendChild(floco);
+    }
+
+    // Sintetizador de Som (Web Audio API)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function tocarSom(tipo) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      const agora = audioCtx.currentTime;
+
+      if (tipo === 'verde') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, agora);
+        osc.frequency.setValueAtTime(659.25, agora + 0.1);
+        osc.frequency.setValueAtTime(783.99, agora + 0.2);
+        gain.gain.setValueAtTime(0.3, agora); gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.4);
+        osc.start(agora); osc.stop(agora + 0.4);
+      } else if (tipo === 'vermelho') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, agora);
+        osc.frequency.exponentialRampToValueAtTime(55, agora + 0.45);
+        gain.gain.setValueAtTime(0.5, agora); gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.5);
+        osc.start(agora); osc.stop(agora + 0.5);
+      } else if (tipo === 'peguei') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(440, agora);
+        osc.frequency.setValueAtTime(320, agora + 0.15);
+        osc.frequency.setValueAtTime(440, agora + 0.3);
+        gain.gain.setValueAtTime(0.4, agora); gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.5);
+        osc.start(agora); osc.stop(agora + 0.5);
+      } else if (tipo === 'vitoria') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, agora);
+        osc.frequency.setValueAtTime(659.25, agora + 0.15);
+        osc.frequency.setValueAtTime(783.99, agora + 0.3);
+        osc.frequency.setValueAtTime(1046.50, agora + 0.45);
+        gain.gain.setValueAtTime(0.4, agora); gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.9);
+        osc.start(agora); osc.stop(agora + 0.9);
+      }
+    }
+
+    let podeAndar = false;
+    let modoAutomatico = false;
+    let cameraAtiva = false;
+    let alertaAberto = false;
+    let timerAuto = null;
+    let referenciaPontos = null;
+    let flagradoCentro = null; // Guarda a posição de quem foi pego para manter o círculo na tela
+
+    const avatar = document.getElementById('avatar-grinch');
+    const statusTexto = document.getElementById('status-texto');
+    const subtitulo = document.getElementById('subtitulo-acao');
+    const badgeModo = document.getElementById('badge-modo');
+    const overlay = document.getElementById('overlay-evento');
+    const videoElement = document.getElementById('webcam');
+    const canvasElement = document.getElementById('canvas-camera');
+    const canvasCtx = canvasElement.getContext('2d');
+    const caixaMonitor = document.getElementById('caixa-monitor');
+    const textoCamera = document.getElementById('texto-camera');
+    const audioFala = document.getElementById('audio-fala');
+
+    function atualizarBadge() {
+      const textoModo = modoAutomatico ? 'Modo: Automático 🤖' : 'Modo: Manual (Aperte ESPAÇO)';
+      const textoCam = cameraAtiva ? ' | Câmera: Ativa 🟢' : ' | Câmera: Desativada';
+      badgeModo.innerText = textoModo + textoCam;
+    }
+
+    function mudarEstado(verde) {
+      podeAndar = verde;
+      if (verde) {
+        document.body.className = 'estado-verde';
+        avatar.innerText = '🎄';
+        statusTexto.innerText = '🟢 PODE ANDAR!';
+        subtitulo.innerText = 'O Grinch está de costas... Corra!';
+        tocarSom('verde');
+        audioFala.currentTime = 0;
+        audioFala.play().catch(() => {});
+      } else {
+        document.body.className = 'estado-vermelho';
+        avatar.innerText = '👹';
+        statusTexto.innerText = '🛑 ESTÁTUA!';
+        subtitulo.innerText = 'O Grinch virou! Não se mexa!';
+        audioFala.pause();
+        tocarSom('vermelho');
+        referenciaPontos = null;
+        flagradoCentro = null;
+      }
+    }
+
+    function mostrarOverlay(icone, titulo, desc, somTipo, tipoTravado) {
+      if (alertaAberto) return;
+      alertaAberto = true;
+
+      const estavaAuto = modoAutomatico;
+      if (estavaAuto) clearTimeout(timerAuto);
+
+      document.getElementById('overlay-icone').innerText = icone;
+      document.getElementById('overlay-titulo').innerText = titulo;
+      document.getElementById('overlay-desc').innerText = desc;
+      overlay.style.display = 'flex';
+      
+      document.body.className = tipoTravado === 'vitoria' ? 'travado-vitoria' : 'travado-alerta';
+      if (tipoTravado === 'alerta') caixaMonitor.classList.add('alerta-flagra');
+      
+      tocarSom(somTipo);
+
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        document.body.className = podeAndar ? 'estado-verde' : 'estado-vermelho';
+        caixaMonitor.classList.remove('alerta-flagra');
+        flagradoCentro = null;
+        alertaAberto = false;
+        if (estavaAuto) cicloAutomatico();
+      }, 4000);
+    }
+
+    const pose = new Pose({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+    });
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
+
+    pose.onResults((results) => {
+      if (!cameraAtiva) return;
+
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+      // Se o alerta estiver aberto, mantém o círculo vermelho fixo na pessoa que foi pega
+      if (alertaAberto && flagradoCentro) {
+        canvasCtx.beginPath();
+        canvasCtx.arc(flagradoCentro.x, flagradoCentro.y, 130, 0, 2 * Math.PI);
+        canvasCtx.lineWidth = 14;
+        canvasCtx.strokeStyle = '#ff0000';
+        canvasCtx.stroke();
+        canvasCtx.restore();
+        return;
+      }
+
+      if (results.poseLandmarks && !alertaAberto) {
+        const pontos = results.poseLandmarks;
+
+        // 1. Vitória por aproximação
+        const larguraOmbros = Math.abs(pontos[11].x - pontos[12].x);
+        if (larguraOmbros > 0.30) {
+          canvasCtx.restore();
+          mostrarOverlay('🏆', 'SALVOU O NATAL!', 'Chegou perto da câmera e venceu!', 'vitoria', 'vitoria');
+          return;
+        }
+
+        // 2. Se estiver vermelho (estátua), verifica movimento de qualquer pessoa no enquadramento
+        if (!podeAndar) {
+          if (!referenciaPontos) {
+            referenciaPontos = pontos;
+          } else {
+            let diferencaTotal = 0;
+            for (let i = 11; i < 24; i++) {
+              const dx = pontos[i].x - referenciaPontos[i].x;
+              const dy = pontos[i].y - referenciaPontos[i].y;
+              diferencaTotal += Math.sqrt(dx * dx + dy * dy);
+            }
+
+            if (diferencaTotal > 1.6) {
+              // Salva a posição exata para o círculo persistir na tela
+              flagradoCentro = {
+                x: ((pontos[11].x + pontos[12].x) / 2) * canvasElement.width,
+                y: ((pontos[11].y + pontos[23].y) / 2) * canvasElement.height
+              };
+              
+              canvasCtx.beginPath();
+              canvasCtx.arc(flagradoCentro.x, flagradoCentro.y, 130, 0, 2 * Math.PI);
+              canvasCtx.lineWidth = 14;
+              canvasCtx.strokeStyle = '#ff0000';
+              canvasCtx.stroke();
+
+              referenciaPontos = null;
+              canvasCtx.restore();
+              mostrarOverlay('🚨', 'PEGUEI VOCÊ!', 'Movimento flagrado na câmera!', 'peguei', 'alerta');
+              return;
+            }
+          }
+        }
+      }
+      canvasCtx.restore();
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        if (cameraAtiva && pose) await pose.send({ image: videoElement });
+      },
+      width: 640, height: 480
+    });
+
+    function alternarCamera() {
+      cameraAtiva = !cameraAtiva;
+      if (cameraAtiva && camera) {
+        camera.start();
+        textoCamera.innerText = '🔴 CÂMERA AO VIVO';
+      } else {
+        if (camera) camera.stop();
+        textoCamera.innerText = 'Aperte [C] para ligar a câmera';
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+      atualizarBadge();
+    }
+
+    function cicloAutomatico() {
+      if (!modoAutomatico || alertaAberto) return;
+      mudarEstado(!podeAndar);
+      const tempoProximo = podeAndar ? (Math.random() * 3000 + 2500) : (Math.random() * 2000 + 2000);
+      timerAuto = setTimeout(cicloAutomatico, tempoProximo);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (modoAutomatico) { modoAutomatico = false; clearTimeout(timerAuto); }
+        atualizarBadge();
+        mudarEstado(!podeAndar);
+      } 
+      else if (e.code === 'KeyA') {
+        modoAutomatico = !modoAutomatico;
+        atualizarBadge();
+        if (modoAutomatico) { cicloAutomatico(); } else { clearTimeout(timerAuto); }
+      }
+      else if (e.code === 'KeyC') {
+        alternarCamera();
+      }
+      else if (e.code === 'KeyX') {
+        mostrarOverlay('🚨', 'PEGUEI VOCÊ!', 'O Grinch viu você mexer!', 'peguei', 'alerta');
+      }
+      else if (e.code === 'KeyV') {
+        mostrarOverlay('🏆', 'SALVOU O NATAL!', 'Parabéns! Você venceu o Grinch!', 'vitoria', 'vitoria');
+      }
+    });
+  </script>
+</body>
+</html>

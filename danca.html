@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>A Dança da Rena 🦌</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: radial-gradient(circle at center, #143d59 0%, #061826 90%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      border: 14px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #ffd700, #ffd700 20px, #c41e3a 20px, #c41e3a 40px) 14;
+    }
+
+    .pisca-pisca {
+      width: 100%; display: flex; justify-content: space-around; padding: 8px 20px; z-index: 4;
+    }
+    .luz {
+      width: 16px; height: 24px; border-radius: 50%;
+      animation: piscar 0.8s infinite alternate;
+    }
+    .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 15px #ff2a2a; }
+    .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 15px #ffd700; animation-delay: 0.2s; }
+    .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 15px #2ecc71; animation-delay: 0.4s; }
+    .luz:nth-child(4n+4) { background: #3498db; box-shadow: 0 0 15px #3498db; animation-delay: 0.6s; }
+
+    @keyframes piscar {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    header { z-index: 4; margin-top: 2px; width: 90%; }
+    h1 { font-size: 2.2rem; color: #ffd700; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+
+    .placar-container {
+      display: flex; justify-content: space-around; align-items: center;
+      margin-top: 5px; background: rgba(0,0,0,0.5); padding: 6px 20px;
+      border-radius: 20px; border: 2px solid #ffd700; font-size: 1.1rem; font-weight: bold;
+    }
+    #fase-valor { color: #ffd700; }
+    #pontos-valor { color: #2ecc71; }
+    #meta-valor { color: #f39c12; }
+    #tempo-valor { color: #ff4d4d; }
+
+    #palco {
+      z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; width: 90%;
+      position: relative;
+    }
+
+    .papai-noel-dancando {
+      position: absolute; right: 5%; top: 10%; font-size: 5rem;
+      animation: dancaNoel 0.6s infinite alternate ease-in-out; z-index: 5;
+    }
+    @keyframes dancaNoel {
+      0% { transform: translateY(0) rotate(-10deg) scale(1); }
+      100% { transform: translateY(-15px) rotate(10deg) scale(1.1); }
+    }
+
+    .card-pose {
+      width: 220px; height: 220px; border-radius: 30px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; border: 6px solid #ffd700;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.4); background: rgba(0,0,0,0.45);
+      transition: transform 0.1s ease, border-color 0.1s ease;
+    }
+    .card-pose.acerto {
+      border-color: #2ecc71; box-shadow: 0 0 60px #2ecc71; transform: scale(1.08);
+    }
+
+    #icone-pose { font-size: 6rem; line-height: 1; }
+    #nome-pose {
+      margin-top: 8px; font-size: 1.6rem; font-weight: 900; text-transform: uppercase;
+      color: #ffd700; text-shadow: 0 4px 10px rgba(0,0,0,0.9);
+    }
+
+    .barra-tempo-fundo {
+      width: 70%; height: 14px; background: rgba(255,255,255,0.2);
+      border-radius: 10px; overflow: hidden; margin-top: 8px; border: 2px solid #fff;
+    }
+    #barra-tempo-progresso {
+      width: 100%; height: 100%; background: linear-gradient(90deg, #2ecc71, #ffd700, #ff2a2a);
+      transition: width 0.05s linear;
+    }
+
+    .monitor-camera {
+      position: relative; width: 400px; height: 250px;
+      border: 4px solid #ffd700; border-radius: 15px; overflow: hidden;
+      background: #000; box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+      z-index: 10; margin-bottom: 6px;
+    }
+    .monitor-camera canvas {
+      width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+    }
+    .legenda-monitor {
+      position: absolute; bottom: 2px; left: 0; right: 0;
+      font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.75); color: #ffd700; text-align: center;
+    }
+
+    .controles-legenda {
+      z-index: 4; font-size: 0.8rem; color: rgba(255,255,255,0.7);
+      background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 20px; margin-bottom: 5px;
+    }
+
+    #overlay-tela {
+      display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(6, 24, 38, 0.96); z-index: 30; flex-direction: column;
+      justify-content: center; align-items: center; padding: 30px; text-align: center;
+    }
+    #overlay-tela h2 { font-size: 2.8rem; color: #ffd700; margin-bottom: 10px; }
+    #overlay-sub { font-size: 1.3rem; color: #fff; margin-bottom: 25px; max-width: 700px; line-height: 1.5; }
+    
+    .btn-acao {
+      background: #2ecc71; color: #fff; border: none; padding: 15px 40px;
+      font-size: 1.4rem; font-weight: bold; border-radius: 30px; cursor: pointer;
+      box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); transition: transform 0.2s;
+    }
+    .btn-acao:hover { transform: scale(1.08); background: #27ae60; }
+
+    #webcam { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="pisca-pisca" id="luzes-topo"></div>
+
+  <header>
+    <h1>🦌 A DANÇA DA RENA 🕺</h1>
+    <div class="placar-container">
+      <div>FASE: <span id="fase-valor">1 (Fácil)</span></div>
+      <div>PONTOS: <span id="pontos-valor">0</span>/<span id="meta-valor">900</span></div>
+      <div>TEMPO: <span id="tempo-valor">30</span>s</div>
+    </div>
+  </header>
+
+  <div id="palco">
+    <div class="papai-noel-dancando">🎅</div>
+    <div class="card-pose" id="card-pose">
+      <div id="icone-pose">🦌</div>
+    </div>
+    <div id="nome-pose">PREPARE-SE!</div>
+    <div class="barra-tempo-fundo">
+      <div id="barra-tempo-progresso"></div>
+    </div>
+  </div>
+
+  <div class="monitor-camera">
+    <canvas id="canvas-camera" width="640" height="480"></canvas>
+    <div class="legenda-monitor" id="texto-camera">Aperte [C] para ligar a câmera</div>
+  </div>
+
+  <div class="controles-legenda">
+    [ESPAÇO] ou [ENTER] Prosseguir &nbsp;|&nbsp; [C] Ligar Câmera
+  </div>
+
+  <div class="pisca-pisca" id="luzes-base"></div>
+
+  <div id="overlay-tela">
+    <div id="overlay-icone" style="font-size: 5rem; margin-bottom: 10px;">🌟</div>
+    <h2 id="overlay-titulo">BEM-VINDO À DANÇA DA RENA</h2>
+    <div id="overlay-sub">Ligue a câmera apertando <b>[C]</b> antes de começar!<br>Dance junto com o noel e chegue ao Desafio Supremo.</div>
+    <button class="btn-acao" id="btn-prosseguir" onclick="proximaFaseOuInicio()">COMEÇAR JOGO</button>
+  </div>
+
+  <audio id="musica-natal" src="natal.mp3" loop></audio>
+  <video id="webcam" autoplay playsinline></video>
+
+  <script>
+    function criarLuzes(id) {
+      const el = document.getElementById(id);
+      for (let i = 0; i < 14; i++) {
+        const l = document.createElement('div'); l.className = 'luz'; el.appendChild(l);
+      }
+    }
+    criarLuzes('luzes-topo');
+    criarLuzes('luzes-base');
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function tocarSom(tipo) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      const agora = audioCtx.currentTime;
+
+      if (tipo === 'acerto') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, agora);
+        osc.frequency.setValueAtTime(880, agora + 0.1);
+        gain.gain.setValueAtTime(0.2, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.2);
+        osc.start(agora); osc.stop(agora + 0.2);
+      } else if (tipo === 'nova-pose') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, agora);
+        gain.gain.setValueAtTime(0.1, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.12);
+        osc.start(agora); osc.stop(agora + 0.12);
+      } else if (tipo === 'vitoria') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, agora);
+        osc.frequency.setValueAtTime(659.25, agora + 0.15);
+        osc.frequency.setValueAtTime(783.99, agora + 0.3);
+        osc.frequency.setValueAtTime(1046.50, agora + 0.45);
+        gain.gain.setValueAtTime(0.4, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.8);
+        osc.start(agora); osc.stop(agora + 0.8);
+      } else if (tipo === 'erro') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, agora);
+        osc.frequency.setValueAtTime(150, agora + 0.15);
+        gain.gain.setValueAtTime(0.3, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.3);
+        osc.start(agora); osc.stop(agora + 0.3);
+      }
+    }
+
+    const musicaNatal = document.getElementById('musica-natal');
+
+    function iniciarMusicaNatal() {
+      if (musicaNatal.paused) {
+        musicaNatal.currentTime = 0;
+        musicaNatal.play().catch(e => console.log("Áudio aguardando interação"));
+      }
+    }
+    function pararMusicaNatal() {
+      musicaNatal.pause();
+      musicaNatal.currentTime = 0;
+    }
+
+    const POSES = [
+      { id: 'ambos-cima', nome: '🙌 AMBOS OS BRAÇOS NO ALTO!', icone: '🙌' },
+      { id: 'direito-cima', nome: '🙋‍♂️ SÓ O BRAÇO DIREITO NO ALTO!', icone: '🙋‍♂️' },
+      { id: 'esquerdo-cima', nome: '🙋‍♀️ SÓ O BRAÇO ESQUERDO NO ALTO!', icone: '🙋‍♀️' },
+      { id: 'cintura', nome: '💃 MÃOS NA CINTURA!', icone: '💃' },
+      { id: 'cabeca', nome: '🙆‍♂️ MÃOS NA CABEÇA!', icone: '🙆‍♂️' },
+      { id: 't-pose', nome: '✝️ BRAÇOS ABERTOS EM CRUZ!', icone: '✝️' },
+      { id: 'abaixado', nome: '🧘‍♂️ AGACHAR BEM ABAIXO!', icone: '🧘‍♂️' }
+    ];
+
+    let faseAtual = 0; 
+    let jogoAtivo = false;
+    let cameraAtiva = false;
+    let pontosFase = 0;
+    let tempoRestante = 30;
+    let poseAtual = null;
+    let tempoPoseMax = 4000;
+    let tempoPoseRestante = 4000;
+    let loopFase = null;
+    let loopPose = null;
+    let cooldownPonto = false;
+
+    // Metas atualizadas (Fase 4 agora com 2000 pontos)
+    const METAS_FASE = {
+      1: 900, 
+      2: 1700, 
+      3: 1800, 
+      4: 2000, 
+      5: 2300  
+    };
+
+    const cardPose = document.getElementById('card-pose');
+    const iconePose = document.getElementById('icone-pose');
+    const nomePose = document.getElementById('nome-pose');
+    const barraProgresso = document.getElementById('barra-tempo-progresso');
+    const pontosEl = document.getElementById('pontos-valor');
+    const metaEl = document.getElementById('meta-valor');
+    const tempoEl = document.getElementById('tempo-valor');
+    const faseEl = document.getElementById('fase-valor');
+    const overlayTela = document.getElementById('overlay-tela');
+    const overlayTitulo = document.getElementById('overlay-titulo');
+    const overlaySub = document.getElementById('overlay-sub');
+    const btnProsseguir = document.getElementById('btn-prosseguir');
+    const videoElement = document.getElementById('webcam');
+    const canvasElement = document.getElementById('canvas-camera');
+    const canvasCtx = canvasElement.getContext('2d');
+    const textoCamera = document.getElementById('texto-camera');
+
+    function sortearNovaPose() {
+      let nova;
+      do {
+        nova = POSES[Math.floor(Math.random() * POSES.length)];
+      } while (poseAtual && nova.id === poseAtual.id);
+
+      poseAtual = nova;
+      iconePose.innerText = poseAtual.icone;
+      nomePose.innerText = poseAtual.nome;
+      tempoPoseRestante = tempoPoseMax;
+      cooldownPonto = false;
+      tocarSom('nova-pose');
+    }
+
+    function configurarFase() {
+      pontosFase = 0;
+      pontosEl.innerText = '0';
+      metaEl.innerText = METAS_FASE[faseAtual];
+
+      if (faseAtual === 1) {
+        faseEl.innerText = '1 (Fácil)';
+        tempoRestante = 30;
+        tempoPoseMax = 3500;
+      } else if (faseAtual === 2) {
+        faseEl.innerText = '2 (Médio)';
+        tempoRestante = 30;
+        tempoPoseMax = 2800;
+      } else if (faseAtual === 3) {
+        faseEl.innerText = '3 (Difícil)';
+        tempoRestante = 34;
+        tempoPoseMax = 2000;
+      } else if (faseAtual === 4) {
+        faseEl.innerText = '4 (Muito Difícil)';
+        tempoRestante = 37;
+        tempoPoseMax = 1400;
+      } else if (faseAtual === 5) {
+        faseEl.innerText = '🔥 SUPREMO';
+        tempoRestante = 20;
+        tempoPoseMax = 800;
+      }
+    }
+
+    function iniciarFase() {
+      if (!cameraAtiva) {
+        alert("⚠️ Por favor, ligue a câmera primeiro apertando a tecla [C]!");
+        return;
+      }
+
+      configurarFase();
+      overlayTela.style.display = 'none';
+      jogoAtivo = true;
+      iniciarMusicaNatal();
+      sortearNovaPose();
+
+      if (loopPose) clearInterval(loopPose);
+      loopPose = setInterval(() => {
+        if (!jogoAtivo) return;
+        tempoPoseRestante -= 50;
+        const pct = Math.max(0, (tempoPoseRestante / tempoPoseMax) * 100);
+        barraProgresso.style.width = pct + '%';
+
+        if (tempoPoseRestante <= 0) {
+          sortearNovaPose();
+        }
+      }, 50);
+
+      if (loopFase) clearInterval(loopFase);
+      loopFase = setInterval(() => {
+        if (!jogoAtivo) return;
+        tempoRestante--;
+        tempoEl.innerText = tempoRestante;
+
+        if (tempoRestante <= 0) {
+          fimDeFase();
+        }
+      }, 1000);
+    }
+
+    function fimDeFase() {
+      jogoAtivo = false;
+      clearInterval(loopPose);
+      clearInterval(loopFase);
+
+      const meta = METAS_FASE[faseAtual];
+      const passouMeta = pontosFase >= meta;
+
+      if (passouMeta) {
+        tocarSom('vitoria');
+        if (faseAtual < 4) {
+          faseAtual++;
+          overlayTitulo.innerText = `FASE ${faseAtual - 1} CONCLUÍDA!`;
+          overlaySub.innerText = `Sensacional! Você fez ${pontosFase} pontos (Meta: ${meta}).\nDeseja avançar para a próxima fase?`;
+          btnProsseguir.innerText = 'PROSSEGUIR PARA PRÓXIMA FASE';
+          overlayTela.style.display = 'flex';
+        } else if (faseAtual === 4) {
+          faseAtual = 5;
+          overlayTitulo.innerText = 'DESAFIO SUPREMO DESBLOQUEADO!';
+          overlaySub.innerText = `Inacreditável! Meta batida com ${pontosFase} pts.\nAgora é o teste final: apenas 20 segundos em velocidade máxima insana! Aceita o desafio?`;
+          btnProsseguir.innerText = 'ACEITAR DESAFIO SUPREMO';
+          overlayTela.style.display = 'flex';
+        } else {
+          pararMusicaNatal();
+          overlayTitulo.innerText = 'VOCÊ É O REI DA DANÇA!';
+          overlaySub.innerText = `Você completou o Desafio Supremo com ${pontosFase} pontos! Quer jogar novamente?`;
+          btnProsseguir.innerText = 'JOGAR NOVAMENTE';
+          faseAtual = 0;
+          overlayTela.style.display = 'flex';
+        }
+      } else {
+        tocarSom('erro');
+        pararMusicaNatal();
+        overlayTitulo.innerText = 'META NÃO ATINGIDA!';
+        overlaySub.innerText = `Você fez ${pontosFase} pontos, mas a meta exigida era de ${meta} pontos.\nTente novamente!`;
+        btnProsseguir.innerText = 'TENTAR ESTA FASE DE NOVO';
+        overlayTela.style.display = 'flex';
+      }
+    }
+
+    function proximaFaseOuInicio() {
+      if (faseAtual === 0) {
+        faseAtual = 1;
+      }
+      iniciarFase();
+    }
+
+    function validarPose(landmarks, tipoPose) {
+      const ombroEsq = landmarks[11];
+      const ombroDir = landmarks[12];
+      const pulsoEsq = landmarks[15];
+      const pulsoDir = landmarks[16];
+      const quadrilEsq = landmarks[23];
+      const quadrilDir = landmarks[24];
+      const nariz = landmarks[0];
+
+      const pulsoEsqAlto = pulsoEsq.y < ombroEsq.y - 0.12;
+      const pulsoDirAlto = pulsoDir.y < ombroDir.y - 0.12;
+
+      if (tipoPose === 'ambos-cima') {
+        return pulsoEsqAlto && pulsoDirAlto;
+      }
+      if (tipoPose === 'direito-cima') {
+        return pulsoDirAlto && !pulsoEsqAlto;
+      }
+      if (tipoPose === 'esquerdo-cima') {
+        return pulsoEsqAlto && !pulsoDirAlto;
+      }
+      if (tipoPose === 'cintura') {
+        const pertoCinturaEsq = Math.abs(pulsoEsq.y - quadrilEsq.y) < 0.15;
+        const pertoCinturaDir = Math.abs(pulsoDir.y - quadrilDir.y) < 0.15;
+        return pertoCinturaEsq && pertoCinturaDir;
+      }
+      if (tipoPose === 'cabeca') {
+        return pulsoEsq.y < nariz.y + 0.12 && pulsoDir.y < nariz.y + 0.12 && !pulsoEsqAlto;
+      }
+      if (tipoPose === 't-pose') {
+        const bracosAbertos = Math.abs(pulsoEsq.x - pulsoDir.x) > Math.abs(ombroEsq.x - ombroDir.x) * 2.1;
+        const naAlturaOmbro = Math.abs(pulsoEsq.y - ombroEsq.y) < 0.15;
+        return bracosAbertos && naAlturaOmbro;
+      }
+      if (tipoPose === 'abaixado') {
+        return quadrilEsq.y > 0.91 && quadrilDir.y > 0.91 && !pulsoEsqAlto && !pulsoDirAlto;
+      }
+      return false;
+    }
+
+    const pose = new Pose({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+    });
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      minDetectionConfidence: 0.65,
+      minTrackingConfidence: 0.65
+    });
+
+    pose.onResults((results) => {
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+      if (results.poseLandmarks && jogoAtivo && poseAtual) {
+        const landmarks = results.poseLandmarks;
+        const acertou = validarPose(landmarks, poseAtual.id);
+        const centroX = ((landmarks[11].x + landmarks[12].x) / 2) * canvasElement.width;
+        const centroY = ((landmarks[11].y + landmarks[23].y) / 2) * canvasElement.height;
+
+        canvasCtx.beginPath();
+        canvasCtx.arc(centroX, centroY, 95, 0, 2 * Math.PI);
+        canvasCtx.lineWidth = acertou ? 12 : 4;
+        canvasCtx.strokeStyle = acertou ? '#2ecc71' : 'rgba(255, 215, 0, 0.4)';
+        canvasCtx.stroke();
+
+        if (acertou && !cooldownPonto) {
+          cooldownPonto = true;
+          pontosFase += 100;
+          pontosEl.innerText = pontosFase;
+          tocarSom('acerto');
+          cardPose.classList.add('acerto');
+          setTimeout(() => {
+            cardPose.classList.remove('acerto');
+            if (jogoAtivo) sortearNovaPose();
+          }, 800);
+        }
+      }
+      canvasCtx.restore();
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        if (cameraAtiva) await pose.send({ image: videoElement });
+      },
+      width: 640, height: 480
+    });
+
+    function alternarCamera() {
+      cameraAtiva = !cameraAtiva;
+      if (cameraAtiva) {
+        camera.start();
+        textoCamera.innerText = '🔴 CÂMERA AO VIVO';
+      } else {
+        camera.stop();
+        textoCamera.innerText = 'Aperte [C] para ligar a câmera';
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        if (overlayTela.style.display === 'flex') {
+          proximaFaseOuInicio();
+        }
+      } else if (e.code === 'KeyC') {
+        alternarCamera();
+      }
+    });
+  </script>
+</body>
+</html>

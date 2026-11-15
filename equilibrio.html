@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Fábrica de Presentes: Equilíbrio Natalino 🎁</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: radial-gradient(circle at center, #143d59 0%, #061826 90%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      border: 14px solid transparent;
+      border-image: repeating-linear-gradient(45deg, #ffd700, #ffd700 20px, #c41e3a 20px, #c41e3a 40px) 14;
+    }
+
+    .pisca-pisca {
+      width: 100%; display: flex; justify-content: space-around; padding: 6px 20px; z-index: 4;
+    }
+    .luz {
+      width: 16px; height: 24px; border-radius: 50%;
+      animation: piscar 0.8s infinite alternate;
+    }
+    .luz:nth-child(4n+1) { background: #ff2a2a; box-shadow: 0 0 15px #ff2a2a; }
+    .luz:nth-child(4n+2) { background: #ffd700; box-shadow: 0 0 15px #ffd700; animation-delay: 0.2s; }
+    .luz:nth-child(4n+3) { background: #2ecc71; box-shadow: 0 0 15px #2ecc71; animation-delay: 0.4s; }
+    .luz:nth-child(4n+4) { background: #3498db; box-shadow: 0 0 15px #3498db; animation-delay: 0.6s; }
+
+    @keyframes piscar {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    header { z-index: 4; margin-top: 2px; width: 90%; }
+    h1 { font-size: 2.1rem; color: #ffd700; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+
+    .placar-container {
+      display: flex; justify-content: space-around; align-items: center;
+      margin-top: 5px; background: rgba(0,0,0,0.55); padding: 6px 20px;
+      border-radius: 20px; border: 2px solid #ffd700; font-size: 1.1rem; font-weight: bold;
+    }
+    #pilha-valor { color: #2ecc71; }
+    #recorde-valor { color: #f39c12; }
+    #rodada-valor { color: #ff4d4d; }
+    #tempo-valor { color: #3498db; }
+
+    #area-jogo {
+      position: relative;
+      width: 680px;
+      height: 500px;
+      border: 5px solid #ffd700;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.85);
+      z-index: 10;
+      margin: auto;
+    }
+
+    #canvas-camera {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .legenda-monitor {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      font-size: 0.85rem; font-weight: bold; background: rgba(0,0,0,0.75);
+      color: #ffd700; text-align: center; padding: 4px;
+    }
+
+    .controles-legenda {
+      z-index: 4; font-size: 0.85rem; color: rgba(255,255,255,0.75);
+      background: rgba(0,0,0,0.45); padding: 4px 14px; border-radius: 20px; margin-bottom: 5px;
+    }
+
+    #overlay-tela {
+      display: flex; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(6, 24, 38, 0.96); z-index: 30; flex-direction: column;
+      justify-content: center; align-items: center; padding: 30px; text-align: center;
+      transition: background 0.3s;
+    }
+    #overlay-tela.tela-vermelha {
+      background: rgba(185, 18, 27, 0.96);
+    }
+    #overlay-tela.tela-rei {
+      background: radial-gradient(circle at center, rgba(212, 175, 55, 0.95) 0%, rgba(120, 20, 40, 0.98) 100%);
+      border: 18px solid #ffd700;
+      box-shadow: inset 0 0 80px rgba(255, 215, 0, 0.9);
+    }
+    #overlay-tela.tela-rei h2 {
+      color: #fff;
+      font-size: 3.3rem;
+      text-shadow: 0 0 25px #ffd700, 0 4px 12px #000;
+      animation: pulsarRei 0.9s infinite alternate;
+    }
+    @keyframes pulsarRei {
+      from { transform: scale(1); }
+      to { transform: scale(1.06); }
+    }
+
+    #overlay-tela h2 { font-size: 2.8rem; color: #ffd700; margin-bottom: 10px; }
+    #overlay-sub { font-size: 1.25rem; color: #fff; margin-bottom: 25px; max-width: 720px; line-height: 1.5; }
+
+    .botoes-overlay {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-acao {
+      background: #2ecc71; color: #fff; border: none; padding: 15px 40px;
+      font-size: 1.4rem; font-weight: bold; border-radius: 30px; cursor: pointer;
+      box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); transition: transform 0.2s;
+    }
+    .btn-acao:hover { transform: scale(1.08); background: #27ae60; }
+
+    .btn-parar {
+      background: #e67e22; color: #fff; border: none; padding: 15px 40px;
+      font-size: 1.4rem; font-weight: bold; border-radius: 30px; cursor: pointer;
+      box-shadow: 0 0 20px rgba(230, 126, 34, 0.6); transition: transform 0.2s;
+      display: none;
+    }
+    .btn-parar:hover { transform: scale(1.08); background: #d35400; }
+
+    #webcam { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="pisca-pisca" id="luzes-topo"></div>
+
+  <header>
+    <h1>🎁 FÁBRICA DE PRESENTES: EQUILÍBRIO ⚖️</h1>
+    <div class="placar-container">
+      <div>EMPILHADOS: <span id="pilha-valor">0</span></div>
+      <div>RECORDE: <span id="recorde-valor">0</span></div>
+      <div>RODADA: <span id="rodada-valor">1/6</span></div>
+      <div>TEMPO: <span id="tempo-valor">30</span>s</div>
+    </div>
+  </header>
+
+  <div id="area-jogo">
+    <canvas id="canvas-camera" width="640" height="480"></canvas>
+    <div class="legenda-monitor" id="texto-camera">Aperte [C] para ligar a câmera</div>
+  </div>
+
+  <div class="controles-legenda">
+    [C] Ligar Câmera &nbsp;|&nbsp; [ESPAÇO] ou [ENTER] Começar &nbsp;|&nbsp; [M] Música &nbsp;|&nbsp; Pegue com uma mão e equilibre na outra!
+  </div>
+
+  <div class="pisca-pisca" id="luzes-base"></div>
+
+  <div id="overlay-tela">
+    <div id="overlay-emoji" style="font-size: 5rem; margin-bottom: 10px;">🎅</div>
+    <h2 id="overlay-titulo">EQUILÍBRIO NA FÁBRICA DE BRINQUEDOS</h2>
+    <div id="overlay-sub">
+      Ligue a câmera apertando <b>[C]</b> antes de começar!<br><br>
+      ✋ <b>Mão de Equilíbrio (Esquerda na tela):</b> Mantenha firme para segurar a pilha de presentes.<br>
+      🤚 <b>Mão de Coleta (Direita na tela):</b> Toque nos presentes que caem do céu para empilhar na sua mão!<br>
+      ⚠️ Se derrubar, perde tudo na hora! Chegue até a <b>Rodada 6</b> para se tornar o <b>Rei do Equilíbrio</b>!
+    </div>
+    <div class="botoes-overlay">
+      <button class="btn-acao" id="btn-prosseguir" onclick="iniciarContagemRegressiva()">COMEÇAR JOGO</button>
+      <button class="btn-parar" id="btn-parar" onclick="garantirPontos()">GARANTIR PONTOS</button>
+    </div>
+  </div>
+
+  <video id="webcam" autoplay playsinline></video>
+
+  <script>
+    function criarLuzes(id) {
+      const el = document.getElementById(id);
+      for (let i = 0; i < 14; i++) {
+        const l = document.createElement('div'); l.className = 'luz'; el.appendChild(l);
+      }
+    }
+    criarLuzes('luzes-topo');
+    criarLuzes('luzes-base');
+
+    // Efeitos Sonoros + Musiquinha Natalina de Fundo (Web Audio API)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let musicaInterval = null;
+    let musicaMutada = false;
+    let notaIndex = 0;
+
+    // Melodia leve de Jingle Bells em loop suave
+    const melodiaNatal = [
+      { f: 659.25, d: 0.22 }, { f: 659.25, d: 0.22 }, { f: 659.25, d: 0.44 },
+      { f: 659.25, d: 0.22 }, { f: 659.25, d: 0.22 }, { f: 659.25, d: 0.44 },
+      { f: 659.25, d: 0.22 }, { f: 783.99, d: 0.22 }, { f: 523.25, d: 0.30 }, { f: 587.33, d: 0.15 }, { f: 659.25, d: 0.65 },
+      { f: 698.46, d: 0.22 }, { f: 698.46, d: 0.22 }, { f: 698.46, d: 0.30 }, { f: 698.46, d: 0.15 },
+      { f: 698.46, d: 0.22 }, { f: 659.25, d: 0.22 }, { f: 659.25, d: 0.22 }, { f: 659.25, d: 0.22 },
+      { f: 659.25, d: 0.22 }, { f: 587.33, d: 0.22 }, { f: 587.33, d: 0.22 }, { f: 659.25, d: 0.22 }, { f: 587.33, d: 0.44 }, { f: 783.99, d: 0.44 }
+    ];
+
+    function iniciarMusicaFundo() {
+      if (musicaInterval) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      notaIndex = 0;
+
+      function tocarProximaNota() {
+        if (!musicaInterval) return;
+        const nota = melodiaNatal[notaIndex % melodiaNatal.length];
+        if (!musicaMutada && audioCtx.state === 'running') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(nota.f, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.045, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + nota.d);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + nota.d);
+        }
+        notaIndex++;
+        musicaInterval = setTimeout(tocarProximaNota, nota.d * 1000 + 60);
+      }
+
+      musicaInterval = setTimeout(tocarProximaNota, 100);
+    }
+
+    function alternarMusica() {
+      musicaMutada = !musicaMutada;
+    }
+
+    function tocarSom(tipo) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const agora = audioCtx.currentTime;
+
+      if (tipo === 'pegar') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, agora);
+        osc.frequency.setValueAtTime(880, agora + 0.08);
+        gain.gain.setValueAtTime(0.25, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.18);
+        osc.start(agora); osc.stop(agora + 0.18);
+      } else if (tipo === 'desabar') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, agora);
+        osc.frequency.exponentialRampToValueAtTime(65, agora + 0.45);
+        gain.gain.setValueAtTime(0.35, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.5);
+        osc.start(agora); osc.stop(agora + 0.5);
+      } else if (tipo === 'bip') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, agora);
+        gain.gain.setValueAtTime(0.2, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.15);
+        osc.start(agora); osc.stop(agora + 0.15);
+      } else if (tipo === 'vitoria') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, agora);
+        osc.frequency.setValueAtTime(659.25, agora + 0.15);
+        osc.frequency.setValueAtTime(783.99, agora + 0.3);
+        osc.frequency.setValueAtTime(1046.50, agora + 0.45);
+        gain.gain.setValueAtTime(0.4, agora);
+        gain.gain.exponentialRampToValueAtTime(0.01, agora + 0.8);
+        osc.start(agora); osc.stop(agora + 0.8);
+      } else if (tipo === 'rei') {
+        // Fanfarra real épica de vitória suprema!
+        const fanfarra = [
+          { f: 523.25, t: 0.00, d: 0.16 }, // Dó
+          { f: 659.25, t: 0.16, d: 0.16 }, // Mi
+          { f: 783.99, t: 0.32, d: 0.16 }, // Sol
+          { f: 1046.50, t: 0.48, d: 0.42 }, // Dó agudo
+          { f: 783.99, t: 0.92, d: 0.20 }, // Sol
+          { f: 1046.50, t: 1.14, d: 0.85 } // Dó triunfal
+        ];
+        fanfarra.forEach(n => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(n.f, agora + n.t);
+          gain.gain.setValueAtTime(0.35, agora + n.t);
+          gain.gain.exponentialRampToValueAtTime(0.01, agora + n.t + n.d);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(agora + n.t);
+          osc.stop(agora + n.t + n.d);
+        });
+      }
+    }
+
+    const ICONES_PRESENTES = ['🎁', '🧸', '🚂', '⚽', '🪀', '🤖', '🥁', '🎄'];
+    const MAX_RODADAS = 6;
+
+    let jogoAtivo = false;
+    let cameraAtiva = false;
+    let contagemAtiva = false;
+    let mantendoTorreProximaRodada = false;
+    let modoReiAtivo = false;
+    let rodadaAtual = 1;
+    let tempoRestante = 30;
+    let recordePilha = 0;
+
+    // Listas de objetos
+    let listaPresentesCéu = []; // Presentes caindo para serem pegos
+    let pilhaNaMao = [];        // Presentes já pegos e empilhados na mão de equilíbrio
+    let presentesCaindoChao = []; // Presentes que desabaram da mão
+
+    // Calibração da Mão de Equilíbrio (sensibilidade aumentada mais um pouquinho: 0.055 -> 0.044)
+    let posEquilibrioAnterior = null;
+    let cooldownDesabamento = false;
+    const SENSIBILIDADE_MOVIMENTO = 0.044;
+
+    let loopTimer = null;
+    let checkQuedaInterval = null;
+    let timeoutQuedaMax = null;
+
+    const canvasElement = document.getElementById('canvas-camera');
+    const canvasCtx = canvasElement.getContext('2d');
+    const videoElement = document.getElementById('webcam');
+    const textoCamera = document.getElementById('texto-camera');
+    const overlayTela = document.getElementById('overlay-tela');
+    const overlayEmoji = document.getElementById('overlay-emoji');
+    const overlayTitulo = document.getElementById('overlay-titulo');
+    const overlaySub = document.getElementById('overlay-sub');
+    const btnProsseguir = document.getElementById('btn-prosseguir');
+    const btnParar = document.getElementById('btn-parar');
+    const pilhaEl = document.getElementById('pilha-valor');
+    const recordeEl = document.getElementById('recorde-valor');
+    const rodadaEl = document.getElementById('rodada-valor');
+    const tempoEl = document.getElementById('tempo-valor');
+
+    function criarPresenteAleatorio() {
+      return {
+        icone: ICONES_PRESENTES[Math.floor(Math.random() * ICONES_PRESENTES.length)],
+        x: Math.random() * (canvasElement.width * 0.45) + (canvasElement.width * 0.05),
+        y: -40,
+        velocidade: Math.random() * 2.2 + 2.3 + (rodadaAtual - 1) * 0.4
+      };
+    }
+
+    function iniciarContagemRegressiva() {
+      if (!cameraAtiva) {
+        alert("⚠️ Por favor, ligue a câmera primeiro apertando a tecla [C]!");
+        return;
+      }
+      if (contagemAtiva) return;
+      contagemAtiva = true;
+      modoReiAtivo = false;
+      iniciarMusicaFundo();
+
+      overlayTela.classList.remove('tela-vermelha', 'tela-rei');
+      btnProsseguir.style.display = 'none';
+      btnParar.style.display = 'none';
+
+      let contador = 3;
+      overlayEmoji.innerText = '🎅';
+      overlayTitulo.innerText = `PREPARE SUAS MÃOS... ${contador}`;
+      overlaySub.innerText = mantendoTorreProximaRodada
+        ? `Segure firme sua torre de ${pilhaNaMao.length} presentes para a Rodada ${rodadaAtual}/${MAX_RODADAS}!`
+        : "Posicione uma mão parada para equilibrar e deixe a outra livre para pegar os brinquedos!";
+      tocarSom('bip');
+
+      const intervalo = setInterval(() => {
+        contador--;
+        if (contador > 0) {
+          overlayTitulo.innerText = `PREPARE SUAS MÃOS... ${contador}`;
+          tocarSom('bip');
+        } else {
+          clearInterval(intervalo);
+          contagemAtiva = false;
+          btnProsseguir.style.display = 'inline-block';
+          iniciarJogo();
+        }
+      }, 1000);
+    }
+
+    function iniciarJogo() {
+      overlayTela.style.display = 'none';
+      overlayTela.classList.remove('tela-vermelha', 'tela-rei');
+      tempoRestante = 30;
+
+      if (!mantendoTorreProximaRodada) {
+        pilhaNaMao = [];
+        rodadaAtual = 1;
+      }
+      mantendoTorreProximaRodada = false;
+
+      presentesCaindoChao = [];
+      listaPresentesCéu = [criarPresenteAleatorio(), criarPresenteAleatorio()];
+      posEquilibrioAnterior = null;
+      cooldownDesabamento = false;
+
+      pilhaEl.innerText = pilhaNaMao.length;
+      rodadaEl.innerText = `${rodadaAtual}/${MAX_RODADAS}`;
+      tempoEl.innerText = tempoRestante;
+      jogoAtivo = true;
+
+      if (loopTimer) clearInterval(loopTimer);
+      loopTimer = setInterval(() => {
+        if (!jogoAtivo) return;
+        tempoRestante--;
+        tempoEl.innerText = tempoRestante;
+        if (tempoRestante <= 0) {
+          fimDeTempoRodada();
+        }
+      }, 1000);
+    }
+
+    function mostrarTelaVermelhaDerrota() {
+      if (checkQuedaInterval) { clearInterval(checkQuedaInterval); checkQuedaInterval = null; }
+      if (timeoutQuedaMax) { clearTimeout(timeoutQuedaMax); timeoutQuedaMax = null; }
+      presentesCaindoChao = [];
+
+      overlayTela.classList.remove('tela-rei');
+      overlayTela.classList.add('tela-vermelha');
+      overlayEmoji.innerText = '💥';
+      overlayTitulo.innerText = 'VOCÊ DERRUBOU OS PRESENTES!';
+      overlaySub.innerText = 'Sua pontuação voltou para 0! Tente novamente e não deixe cair.';
+      btnProsseguir.innerText = 'TENTAR NOVAMENTE';
+      btnParar.style.display = 'none';
+      overlayTela.style.display = 'flex';
+    }
+
+    function derrubarPilha(maoX, maoY) {
+      if (pilhaNaMao.length === 0 || cooldownDesabamento) return;
+
+      cooldownDesabamento = true;
+      jogoAtivo = false;
+      clearInterval(loopTimer);
+      tocarSom('desabar');
+
+      // Transforma cada presente da pilha em um objeto caindo com física de gravidade
+      pilhaNaMao.forEach((item, idx) => {
+        presentesCaindoChao.push({
+          icone: item.icone,
+          x: maoX + item.offsetX,
+          y: maoY - (idx + 1) * 36,
+          vx: (Math.random() - 0.5) * 14,
+          vy: -2 - Math.random() * 4,
+          rotacao: 0,
+          vRot: (Math.random() - 0.5) * 0.3
+        });
+      });
+
+      // Zera os pontos acumulados imediatamente
+      pilhaNaMao = [];
+      rodadaAtual = 1;
+      mantendoTorreProximaRodada = false;
+      pilhaEl.innerText = '0';
+      rodadaEl.innerText = `1/${MAX_RODADAS}`;
+
+      // Espera os presentes terminarem de cair da tela (ou no máximo 4s) antes de mostrar a tela vermelha
+      checkQuedaInterval = setInterval(() => {
+        if (presentesCaindoChao.length === 0) {
+          mostrarTelaVermelhaDerrota();
+        }
+      }, 100);
+
+      timeoutQuedaMax = setTimeout(() => {
+        mostrarTelaVermelhaDerrota();
+      }, 4000);
+    }
+
+    function fimDeTempoRodada() {
+      jogoAtivo = false;
+      clearInterval(loopTimer);
+
+      const pontosAcumulados = pilhaNaMao.length;
+
+      // Concluiu a rodada máxima (6)! Tela especial de Rei do Equilíbrio!
+      if (rodadaAtual >= MAX_RODADAS) {
+        tocarSom('rei');
+        modoReiAtivo = true;
+
+        if (pontosAcumulados > recordePilha) {
+          recordePilha = pontosAcumulados;
+          recordeEl.innerText = recordePilha;
+        }
+
+        pilhaNaMao = [];
+        rodadaAtual = 1;
+        mantendoTorreProximaRodada = false;
+        pilhaEl.innerText = '0';
+        rodadaEl.innerText = `1/${MAX_RODADAS}`;
+
+        overlayTela.classList.remove('tela-vermelha');
+        overlayTela.classList.add('tela-rei');
+        overlayEmoji.innerText = '👑🤴👑';
+        overlayTitulo.innerText = 'REI DO EQUILÍBRIO!';
+        overlaySub.innerHTML = `LENDÁRIO! Você sobreviveu a todas as <b>${MAX_RODADAS} rodadas</b> sem deixar a torre cair!<br>Pontuação Suprema: <b>${pontosAcumulados}</b> presentes equilibrados! ✨🎉`;
+        btnProsseguir.innerText = 'JOGAR NOVAMENTE';
+        btnParar.style.display = 'none';
+        overlayTela.style.display = 'flex';
+        return;
+      }
+
+      tocarSom('vitoria');
+      overlayTela.classList.remove('tela-vermelha', 'tela-rei');
+      overlayEmoji.innerText = '⏱️';
+      overlayTitulo.innerText = `FIM DA RODADA ${rodadaAtual}/${MAX_RODADAS}!`;
+      overlaySub.innerHTML = `Você acumulou <b>${pontosAcumulados}</b> pontos na sua torre!<br><br>Deseja <b>arriscar tudo</b> e ir para a Rodada ${rodadaAtual + 1}/${MAX_RODADAS} com essa mesma torre na mão (se derrubar, perde tudo) ou quer <b>parar agora</b> e garantir seus pontos?`;
+
+      mantendoTorreProximaRodada = true;
+      rodadaAtual++;
+      btnProsseguir.innerText = `ARRISCAR TUDO (RODADA ${rodadaAtual}/${MAX_RODADAS})`;
+      btnParar.innerText = `GARANTIR ${pontosAcumulados} PONTOS`;
+      btnParar.style.display = 'inline-block';
+      overlayTela.style.display = 'flex';
+    }
+
+    function garantirPontos() {
+      const pontosGarantidos = pilhaNaMao.length;
+      if (pontosGarantidos > recordePilha) {
+        recordePilha = pontosGarantidos;
+        recordeEl.innerText = recordePilha;
+      }
+
+      pilhaNaMao = [];
+      rodadaAtual = 1;
+      mantendoTorreProximaRodada = false;
+      pilhaEl.innerText = '0';
+      rodadaEl.innerText = `1/${MAX_RODADAS}`;
+
+      overlayEmoji.innerText = '🏆';
+      overlayTitulo.innerText = 'PONTOS GARANTIDOS!';
+      overlaySub.innerText = `Você parou na hora certa e garantiu ${pontosGarantidos} pontos! Seu recorde atual é ${recordePilha}.`;
+      btnProsseguir.innerText = 'JOGAR NOVAMENTE';
+      btnParar.style.display = 'none';
+    }
+
+    // Helper para desenhar texto corretamente sem ficar invertido no canvas espelhado
+    function desenharEmojiNormal(texto, x, y, tamanho = 42, angulo = 0) {
+      canvasCtx.save();
+      canvasCtx.translate(x, y);
+      canvasCtx.scale(-1, 1);
+      if (angulo !== 0) canvasCtx.rotate(angulo);
+      canvasCtx.font = `${tamanho}px sans-serif`;
+      canvasCtx.textAlign = 'center';
+      canvasCtx.textBaseline = 'middle';
+      canvasCtx.fillText(texto, 0, 0);
+      canvasCtx.restore();
+    }
+
+    const pose = new Pose({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+    });
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.6
+    });
+
+    pose.onResults((results) => {
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+      // Desenha uma coroa dourada na cabeça se o jogador conquistou o título de Rei do Equilíbrio
+      if (results.poseLandmarks && modoReiAtivo) {
+        const nariz = results.poseLandmarks[0];
+        if (nariz) {
+          const cabecaX = nariz.x * canvasElement.width;
+          const cabecaY = nariz.y * canvasElement.height - 75;
+          desenharEmojiNormal('👑', cabecaX, cabecaY, 72);
+        }
+      }
+
+      // Animação dos presentes caindo no chão mesmo após o desabamento
+      for (let i = presentesCaindoChao.length - 1; i >= 0; i--) {
+        const p = presentesCaindoChao[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.85;
+        p.rotacao += p.vRot;
+
+        desenharEmojiNormal(p.icone, p.x, p.y, 40, p.rotacao);
+
+        if (p.y > canvasElement.height + 60) {
+          presentesCaindoChao.splice(i, 1);
+        }
+      }
+
+      if (results.poseLandmarks && jogoAtivo) {
+        const lm = results.poseLandmarks;
+
+        const pulsoColeta = lm[16];
+        const pulsoEquilibrio = lm[15];
+
+        const coletaX = pulsoColeta.x * canvasElement.width;
+        const coletaY = pulsoColeta.y * canvasElement.height;
+
+        const eqX = pulsoEquilibrio.x * canvasElement.width;
+        const eqY = pulsoEquilibrio.y * canvasElement.height;
+
+        // Mão de Coleta (Azul)
+        canvasCtx.beginPath();
+        canvasCtx.arc(coletaX, coletaY, 28, 0, 2 * Math.PI);
+        canvasCtx.lineWidth = 4;
+        canvasCtx.strokeStyle = '#3498db';
+        canvasCtx.stroke();
+
+        // Base/Bandeja da Mão de Equilíbrio (Dourado)
+        canvasCtx.beginPath();
+        canvasCtx.roundRect(eqX - 45, eqY - 8, 90, 16, 8);
+        canvasCtx.fillStyle = cooldownDesabamento ? '#ff2a2a' : '#ffd700';
+        canvasCtx.fill();
+
+        // 1. Verificar estabilidade da Mão de Equilíbrio
+        if (pilhaNaMao.length > 0 && !cooldownDesabamento) {
+          if (posEquilibrioAnterior) {
+            const deltaX = Math.abs(eqX - posEquilibrioAnterior.x);
+            const deltaY = Math.abs(eqY - posEquilibrioAnterior.y);
+            const deslocamento = Math.hypot(deltaX, deltaY);
+
+            if (deslocamento > canvasElement.width * SENSIBILIDADE_MOVIMENTO) {
+              derrubarPilha(eqX, eqY);
+            }
+          }
+        }
+        posEquilibrioAnterior = { x: eqX, y: eqY };
+
+        // 2. Desenhar os Presentes Empilhados diretamente sobre a Mão de Equilíbrio
+        pilhaNaMao.forEach((item, index) => {
+          const balanco = Math.sin(Date.now() / 200 + index) * (index * 1.2);
+          const itemX = eqX + item.offsetX + balanco;
+          const itemY = eqY - (index + 1) * 36;
+          desenharEmojiNormal(item.icone, itemX, itemY, 40);
+        });
+
+        // 3. Atualizar Presentes caindo do céu e checar colisão com a Mão de Coleta
+        for (let i = listaPresentesCéu.length - 1; i >= 0; i--) {
+          const pres = listaPresentesCéu[i];
+          pres.y += pres.velocidade;
+
+          desenharEmojiNormal(pres.icone, pres.x, pres.y, 44);
+
+          if (pres.y > canvasElement.height + 40) {
+            listaPresentesCéu.splice(i, 1);
+            listaPresentesCéu.push(criarPresenteAleatorio());
+            continue;
+          }
+
+          const distColeta = Math.hypot(pres.x - coletaX, pres.y - coletaY);
+          if (distColeta < 55 && !cooldownDesabamento) {
+            tocarSom('pegar');
+
+            pilhaNaMao.push({
+              icone: pres.icone,
+              offsetX: (Math.random() - 0.5) * 14
+            });
+
+            pilhaEl.innerText = pilhaNaMao.length;
+            if (pilhaNaMao.length > recordePilha) {
+              recordePilha = pilhaNaMao.length;
+              recordeEl.innerText = recordePilha;
+            }
+
+            listaPresentesCéu.splice(i, 1);
+            listaPresentesCéu.push(criarPresenteAleatorio());
+            break;
+          }
+        }
+      }
+
+      canvasCtx.restore();
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        if (cameraAtiva) await pose.send({ image: videoElement });
+      },
+      width: 640, height: 480
+    });
+
+    function alternarCamera() {
+      cameraAtiva = !cameraAtiva;
+      if (cameraAtiva) {
+        camera.start();
+        textoCamera.innerText = '🔴 CÂMERA AO VIVO';
+      } else {
+        camera.stop();
+        textoCamera.innerText = 'Aperte [C] para ligar a câmera';
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        if (overlayTela.style.display === 'flex' && cameraAtiva) {
+          iniciarContagemRegressiva();
+        }
+      } else if (e.code === 'KeyC') {
+        alternarCamera();
+      } else if (e.code === 'KeyM') {
+        alternarMusica();
+      }
+    });
+  </script>
+</body>
+</html>
